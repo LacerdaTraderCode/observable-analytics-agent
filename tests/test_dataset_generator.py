@@ -175,7 +175,8 @@ def test_optional_columns_hold_both_nulls_and_values(
 
 
 def test_every_order_status_appears(connection: duckdb.DuckDBPyConnection) -> None:
-    statuses = {row[0] for row in connection.execute("SELECT DISTINCT status FROM orders")}
+    rows = connection.execute("SELECT DISTINCT status FROM orders").fetchall()
+    statuses = {row[0] for row in rows}
 
     assert statuses == {"completed", "cancelled", "refunded"}
 
