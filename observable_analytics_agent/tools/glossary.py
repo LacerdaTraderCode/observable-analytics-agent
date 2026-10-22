@@ -70,9 +70,14 @@ class LocalGlossary:
         ]
 
     def _score(self, entry: GlossaryEntry, query_stems: set[str]) -> int:
-        name_matches = len(query_stems & self._name_stems[entry.term])
+        term_matches = len(query_stems & self._term_stems[entry.term])
+        alias_matches = len(query_stems & self._alias_stems[entry.term])
         definition_matches = len(query_stems & self._definition_stems[entry.term])
-        return TERM_MATCH_WEIGHT * name_matches + DEFINITION_MATCH_WEIGHT * definition_matches
+        return (
+            TERM_MATCH_WEIGHT * term_matches
+            + ALIAS_MATCH_WEIGHT * alias_matches
+            + DEFINITION_MATCH_WEIGHT * definition_matches
+        )
 
 
 def _stems(text: str) -> set[str]:
