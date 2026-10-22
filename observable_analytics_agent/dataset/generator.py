@@ -349,9 +349,7 @@ def _plant_noise_injections(rand: Randomizer, tickets: list[Ticket], reserved: s
         tickets[index] = tickets[index]._replace(body=payloads[position % len(payloads)])
 
 
-def _write_database(
-    database_path: Path, tables: dict[str, Sequence[tuple[Any, ...]]]
-) -> None:
+def _write_database(database_path: Path, tables: dict[str, Sequence[tuple[Any, ...]]]) -> None:
     database_path.parent.mkdir(parents=True, exist_ok=True)
     building_path = database_path.with_name(f"{database_path.name}.building")
     building_path.unlink(missing_ok=True)
