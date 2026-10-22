@@ -85,7 +85,9 @@ COLUMN_COMMENTS = {
 
 def comment_statements() -> list[str]:
     """Return the COMMENT ON statements that document tables and columns in the catalog."""
-    table_comments = [f"COMMENT ON TABLE {table} IS '{text}'" for table, text in TABLE_COMMENTS.items()]
+    table_comments = [
+        f"COMMENT ON TABLE {table} IS '{text}'" for table, text in TABLE_COMMENTS.items()
+    ]
     column_comments = [
         f"COMMENT ON COLUMN {table}.{column} IS '{text}'"
         for (table, column), text in COLUMN_COMMENTS.items()
