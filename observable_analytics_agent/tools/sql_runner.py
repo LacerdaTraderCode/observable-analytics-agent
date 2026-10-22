@@ -86,7 +86,9 @@ class SqlRunner:
             columns = [column[0] for column in cursor.description]
             fetched = cursor.fetchmany(limits.row_limit + 1)
         except duckdb.InterruptException as error:
-            raise QueryTimedOut(f"The query ran longer than {limits.timeout_seconds:g}s.") from error
+            raise QueryTimedOut(
+                f"The query ran longer than {limits.timeout_seconds:g}s."
+            ) from error
         except duckdb.PermissionException as error:
             raise QueryRejected(f"Blocked by the sandbox: {summarize_error(error)}") from error
         except duckdb.Error as error:
