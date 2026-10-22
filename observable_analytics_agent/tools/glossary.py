@@ -12,7 +12,8 @@ from observable_analytics_agent.tools.base import Tool, ToolResult, to_compact_j
 DEFAULT_GLOSSARY_PATH = Path(__file__).resolve().parents[2] / "glossary" / "business_glossary.json"
 DEFAULT_MATCH_LIMIT = 3
 MAX_MATCH_LIMIT = 5
-TERM_MATCH_WEIGHT = 3
+TERM_MATCH_WEIGHT = 4
+ALIAS_MATCH_WEIGHT = 2
 DEFINITION_MATCH_WEIGHT = 1
 MIN_STEM_LENGTH = 4
 STOP_WORDS = frozenset(
