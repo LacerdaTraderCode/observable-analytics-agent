@@ -97,7 +97,7 @@ def test_the_connection_is_read_only_with_a_locked_configuration(
         connection.close()
 
     assert settings == {
-        "access_mode": "READ_ONLY",
+        "access_mode": "read_only",
         "enable_external_access": "false",
         "lock_configuration": "true",
     }
