@@ -46,9 +46,7 @@ class DescribeSchemaTool(Tool):
         try:
             table_rows = connection.execute(TABLES_SQL).fetchall()
             column_rows = connection.execute(COLUMNS_SQL).fetchall()
-            row_counts = {
-                name: _count_rows(connection, name) for name, _comment in table_rows
-            }
+            row_counts = {name: _count_rows(connection, name) for name, _comment in table_rows}
         finally:
             connection.close()
         columns_by_table = _group_columns(column_rows)
