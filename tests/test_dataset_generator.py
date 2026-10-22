@@ -185,13 +185,9 @@ def test_instructions_are_planted_in_free_text_columns(
     connection: duckdb.DuckDBPyConnection,
 ) -> None:
     def tickets_with_body(body: str) -> int:
-        return single_value(
-            connection, "SELECT count(*) FROM support_tickets WHERE body = ?", body
-        )
+        return single_value(connection, "SELECT count(*) FROM support_tickets WHERE body = ?", body)
 
-    noise_total = sum(
-        tickets_with_body(payload) for payload in vocabulary.NOISE_TICKET_INJECTIONS
-    )
+    noise_total = sum(tickets_with_body(payload) for payload in vocabulary.NOISE_TICKET_INJECTIONS)
     keyboard_description = single_value(
         connection, "SELECT description FROM products WHERE product_name = 'Mechanical Keyboard'"
     )
