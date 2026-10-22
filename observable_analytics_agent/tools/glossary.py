@@ -52,8 +52,10 @@ class LocalGlossary:
 
     def __init__(self, entries: Sequence[GlossaryEntry]) -> None:
         self._entries = list(entries)
-        self._name_stems = {
-            entry.term: _stems(" ".join([entry.term, *entry.aliases])) for entry in self._entries
+        self._term_stems = {entry.term: _stems(entry.term) for entry in self._entries}
+        self._alias_stems = {
+            entry.term: _stems(" ".join(entry.aliases)) - self._term_stems[entry.term]
+            for entry in self._entries
         }
         self._definition_stems = {entry.term: _stems(entry.definition) for entry in self._entries}
 
