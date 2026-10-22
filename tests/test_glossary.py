@@ -47,7 +47,15 @@ def test_finds_a_term_by_its_name(glossary: LocalGlossary) -> None:
 
 
 def test_finds_a_term_by_an_alias(glossary: LocalGlossary) -> None:
+    assert terms_of(glossary.search("gmv", 3))[0] == "gross merchandise value"
+
+
+def test_finds_a_term_by_one_of_its_words(glossary: LocalGlossary) -> None:
     assert terms_of(glossary.search("churn", 3))[0] == "churned customer"
+
+
+def test_the_exact_term_outranks_entries_that_only_mention_it(glossary: LocalGlossary) -> None:
+    assert terms_of(glossary.search("revenue", 3))[0] == "revenue"
 
 
 def test_matches_inflected_words(glossary: LocalGlossary) -> None:
