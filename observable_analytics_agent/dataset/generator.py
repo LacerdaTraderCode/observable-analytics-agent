@@ -193,7 +193,9 @@ def _build_orders(
             )
             orders.append(order)
             order_items.extend(
-                _build_order_items(rand, order.order_id, ordered_day, saleable, len(order_items) + 1)
+                _build_order_items(
+                    rand, order.order_id, ordered_day, saleable, len(order_items) + 1
+                )
             )
     return orders, order_items
 
