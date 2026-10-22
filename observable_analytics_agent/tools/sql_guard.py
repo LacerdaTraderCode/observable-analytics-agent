@@ -25,12 +25,13 @@ def validate_read_only_query(sql: str) -> str:
         raise QueryRejected("The query is empty.")
     if len(statements) > 1:
         raise QueryRejected("Only one statement is allowed per call.")
+    keyword = _leading_keyword(sql)
+    if keyword not in ALLOWED_LEADING_KEYWORDS:
+        found = keyword or sql.strip()[:1]
+        raise QueryRejected(f"A query must start with SELECT or WITH, found '{found}'.")
     statement = statements[0]
     if statement.type != duckdb.StatementType.SELECT:
         raise QueryRejected(f"Only SELECT queries are allowed, not {statement.type.name}.")
-    keyword = _leading_keyword(statement.query)
-    if keyword not in ALLOWED_LEADING_KEYWORDS:
-        raise QueryRejected(f"A query must start with SELECT or WITH, not {keyword or 'nothing'}.")
     return statement.query
 
 
