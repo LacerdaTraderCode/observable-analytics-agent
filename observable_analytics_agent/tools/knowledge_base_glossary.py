@@ -38,7 +38,9 @@ class KnowledgeBaseGlossary:
         except httpx2.HTTPError as error:
             raise GlossaryUnavailable(f"The knowledge base request failed: {error}") from error
         except (KeyError, TypeError, ValueError) as error:
-            raise GlossaryUnavailable("The knowledge base returned an unexpected response.") from error
+            raise GlossaryUnavailable(
+                "The knowledge base returned an unexpected response."
+            ) from error
 
 
 def publish_glossary(entries: Sequence[GlossaryEntry], base_url: str, client: httpx2.Client) -> int:
