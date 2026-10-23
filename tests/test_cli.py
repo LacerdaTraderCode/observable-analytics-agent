@@ -38,7 +38,9 @@ def test_the_seed_option_changes_the_data(tmp_path: Path) -> None:
     main(["generate-dataset", "--path", str(default_path), "--seed", str(DEFAULT_SEED)])
     main(["generate-dataset", "--path", str(other_path), "--seed", str(DEFAULT_SEED + 1)])
 
-    assert summarize_database(default_path).fingerprint != summarize_database(other_path).fingerprint
+    assert (
+        summarize_database(default_path).fingerprint != summarize_database(other_path).fingerprint
+    )
 
 
 def test_the_module_can_be_run_with_python_dash_m(
