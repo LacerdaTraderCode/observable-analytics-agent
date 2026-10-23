@@ -1,9 +1,13 @@
 """The static guard accepts one SELECT or WITH statement and rejects everything else."""
 
+import time
+
 import pytest
 
 from observable_analytics_agent.tools.errors import QueryFailed, QueryRejected
-from observable_analytics_agent.tools.sql_guard import validate_read_only_query
+from observable_analytics_agent.tools.sql_guard import leading_keyword, validate_read_only_query
+
+MAX_SCAN_SECONDS = 2.0
 
 ACCEPTED_QUERIES = {
     "plain select": "SELECT 1",
