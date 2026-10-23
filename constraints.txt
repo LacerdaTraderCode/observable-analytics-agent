@@ -30,7 +30,7 @@ langgraph-sdk==0.4.5
 langsmith==0.14.4
 opentelemetry-api==1.45.0
 opentelemetry-exporter-http-transport==0.66b0
-opentelemetry-exporter-otlp-common==0.66b0
+opentelemetry-exporter-otlp-common==0.66b1
 opentelemetry-exporter-otlp-proto-common==1.45.0
 opentelemetry-exporter-otlp-proto-http==1.45.0
 opentelemetry-proto==1.45.0
