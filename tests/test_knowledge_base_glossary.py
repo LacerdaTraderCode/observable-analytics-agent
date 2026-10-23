@@ -20,7 +20,12 @@ from observable_analytics_agent.tools.knowledge_base_glossary import (
 
 BASE_URL = "http://knowledge-base.test"
 SERVER_SOURCES = [
-    {"document_id": "glossary-revenue", "chunk_index": 0, "text": "revenue: net sales", "score": 0.9}
+    {
+        "document_id": "glossary-revenue",
+        "chunk_index": 0,
+        "text": "revenue: net sales",
+        "score": 0.9,
+    }
 ]
 
 
