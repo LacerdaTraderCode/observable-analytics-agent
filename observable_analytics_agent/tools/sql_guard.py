@@ -25,7 +25,7 @@ def validate_read_only_query(sql: str) -> str:
         raise QueryRejected("The query is empty.")
     if len(statements) > 1:
         raise QueryRejected("Only one statement is allowed per call.")
-    keyword = _leading_keyword(sql)
+    keyword = leading_keyword(sql)
     if keyword not in ALLOWED_LEADING_KEYWORDS:
         found = keyword or sql.strip()[:1]
         raise QueryRejected(f"A query must start with SELECT or WITH, found '{found}'.")
