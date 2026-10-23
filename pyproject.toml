@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 100
+exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "RUF"]
+
+[tool.coverage.run]
+source = ["observable_analytics_agent"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true

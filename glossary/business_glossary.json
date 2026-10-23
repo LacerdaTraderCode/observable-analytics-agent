@@ -1,0 +1,87 @@
+[
+  {
+    "term": "reference date",
+    "aliases": ["today", "current date", "as of date", "this year", "last quarter", "recent"],
+    "definition": "The dataset ends on 2025-12-31, which is treated as today. Relative expressions are measured against it: this year is 2025, last year is 2024, the last 90 days are order dates after 2025-10-02 up to and including 2025-12-31, this quarter is Q4 2025 (2025-10-01 to 2025-12-31) and last quarter is Q3 2025 (2025-07-01 to 2025-09-30)."
+  },
+  {
+    "term": "completed order",
+    "aliases": ["valid order", "successful order", "fulfilled order"],
+    "definition": "An order whose status is 'completed'. Orders with status 'cancelled' or 'refunded' are not completed orders."
+  },
+  {
+    "term": "revenue",
+    "aliases": ["net revenue", "sales", "total sales", "turnover"],
+    "definition": "Net revenue in USD: the sum of quantity * unit_price from order_items, counting only orders with status 'completed'. Cancelled and refunded orders are excluded."
+  },
+  {
+    "term": "gross merchandise value",
+    "aliases": ["gmv", "gross sales", "gross revenue"],
+    "definition": "The sum of quantity * unit_price from order_items over orders of every status, including cancelled and refunded ones."
+  },
+  {
+    "term": "average order value",
+    "aliases": ["aov", "average basket", "average order size"],
+    "definition": "Revenue divided by the number of completed orders in the same period, in USD."
+  },
+  {
+    "term": "active customer",
+    "aliases": ["active customers", "customer activity", "currently active"],
+    "definition": "A customer with at least one completed order in the last 90 days, that is, an order dated after 2025-10-02 up to and including 2025-12-31 (the reference date)."
+  },
+  {
+    "term": "churned customer",
+    "aliases": ["churn", "churned", "lost customer", "lapsed customer"],
+    "definition": "A customer who was active in the previous 90-day window (a completed order dated after 2025-07-04 up to and including 2025-10-02) and is not active in the current 90-day window (no completed order dated after 2025-10-02 up to 2025-12-31)."
+  },
+  {
+    "term": "repeat customer",
+    "aliases": ["returning customer", "repeat buyer", "repeat purchase"],
+    "definition": "A customer with two or more completed orders over the whole dataset."
+  },
+  {
+    "term": "new customer",
+    "aliases": ["new customers", "signups", "new signups", "acquired customers"],
+    "definition": "A customer whose signup_date falls inside the period being analyzed, whether or not they have ordered yet."
+  },
+  {
+    "term": "customer lifetime value",
+    "aliases": ["clv", "ltv", "lifetime value", "lifetime revenue"],
+    "definition": "The total revenue of one customer over the whole dataset, counting only completed orders."
+  },
+  {
+    "term": "high-value customer",
+    "aliases": ["top customer", "big spender", "premium customer"],
+    "definition": "A customer whose customer lifetime value is at least 1000.00 USD."
+  },
+  {
+    "term": "units sold",
+    "aliases": ["quantity sold", "items sold", "volume sold"],
+    "definition": "The sum of order_items.quantity over completed orders."
+  },
+  {
+    "term": "cancellation rate",
+    "aliases": ["cancelled orders", "cancellations", "cancel rate"],
+    "definition": "Orders with status 'cancelled' divided by all orders, as a percentage rounded to 2 decimals."
+  },
+  {
+    "term": "refund rate",
+    "aliases": ["refunded orders", "refunds", "return rate"],
+    "definition": "Orders with status 'refunded' divided by orders with status 'completed' or 'refunded', as a percentage rounded to 2 decimals."
+  },
+  {
+    "term": "open ticket backlog",
+    "aliases": ["backlog", "open tickets", "unresolved tickets", "pending tickets"],
+    "definition": "Support tickets whose status is 'open'. The backlog is counted as of the reference date."
+  },
+  {
+    "term": "resolution time",
+    "aliases": ["time to resolve", "time to resolution", "ticket resolution", "ttr"],
+    "definition": "For resolved support tickets, the hours between opened_at and resolved_at. Open tickets have no resolution time."
+  },
+  {
+    "term": "percentage",
+    "aliases": ["percent", "share", "ratio", "rate"],
+    "definition": "Rates and shares are reported as percentages between 0 and 100 rounded to 2 decimals, for example 12.34 for twelve point three four percent."
+  }
+]
