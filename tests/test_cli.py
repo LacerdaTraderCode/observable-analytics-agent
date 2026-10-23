@@ -47,7 +47,9 @@ def test_the_module_can_be_run_with_python_dash_m(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     path = tmp_path / "analytics.duckdb"
-    monkeypatch.setattr(sys, "argv", ["observable_analytics_agent", "generate-dataset", "--path", str(path)])
+    monkeypatch.setattr(
+        sys, "argv", ["observable_analytics_agent", "generate-dataset", "--path", str(path)]
+    )
 
     with pytest.raises(SystemExit) as exit_info:
         runpy.run_module("observable_analytics_agent", run_name="__main__")
