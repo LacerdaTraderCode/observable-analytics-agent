@@ -12,7 +12,7 @@ from observable_analytics_agent.tools.errors import QueryFailed, QueryRejected, 
 
 ALLOWED_LEADING_KEYWORDS = frozenset({"SELECT", "WITH"})
 
-_LEADING_KEYWORD = re.compile(r"\s*(?:(?:--[^\n]*(?:\n|$)|/\*.*?\*/)\s*)*([A-Za-z_]+)", re.DOTALL)
+_KEYWORD = re.compile(r"[A-Za-z_]+")
 
 
 def validate_read_only_query(sql: str) -> str:
