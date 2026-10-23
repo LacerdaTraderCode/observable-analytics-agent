@@ -12,7 +12,7 @@ from observable_analytics_agent.tools.errors import QueryFailed, QueryRejected, 
 
 ALLOWED_LEADING_KEYWORDS = frozenset({"SELECT", "WITH"})
 
-_LEADING_KEYWORD = re.compile(r"\s*(?:(?:--[^\n]*(?:\n|$)|/\*.*?\*/)\s*)*([A-Za-z_]+)", re.DOTALL)
+_KEYWORD = re.compile(r"[A-Za-z_]+")
 
 
 def validate_read_only_query(sql: str) -> str:
@@ -25,7 +25,7 @@ def validate_read_only_query(sql: str) -> str:
         raise QueryRejected("The query is empty.")
     if len(statements) > 1:
         raise QueryRejected("Only one statement is allowed per call.")
-    keyword = _leading_keyword(sql)
+    keyword = leading_keyword(sql)
     if keyword not in ALLOWED_LEADING_KEYWORDS:
         found = keyword or sql.strip()[:1]
         raise QueryRejected(f"A query must start with SELECT or WITH, found '{found}'.")
@@ -35,6 +35,29 @@ def validate_read_only_query(sql: str) -> str:
     return statement.query
 
 
-def _leading_keyword(statement_text: str) -> str:
-    match = _LEADING_KEYWORD.match(statement_text)
-    return match.group(1).upper() if match else ""
+def leading_keyword(statement_text: str) -> str:
+    """Return the first keyword after whitespace and comments, or an empty string.
+
+    A scanner is used instead of one regular expression: comment patterns with nested
+    quantifiers backtrack exponentially on crafted input, and this text comes from a model.
+    """
+    match = _KEYWORD.match(statement_text, _skip_whitespace_and_comments(statement_text))
+    return match.group().upper() if match else ""
+
+
+def _skip_whitespace_and_comments(text: str) -> int:
+    position = 0
+    while position < len(text):
+        if text[position].isspace():
+            position += 1
+        elif text.startswith("--", position):
+            line_end = text.find("\n", position)
+            position = len(text) if line_end == -1 else line_end + 1
+        elif text.startswith("/*", position):
+            comment_end = text.find("*/", position + 2)
+            if comment_end == -1:
+                return len(text)
+            position = comment_end + 2
+        else:
+            break
+    return position
