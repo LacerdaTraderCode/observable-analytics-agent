@@ -351,6 +351,13 @@ def test_the_outcome_serializes_to_json(tool_registry: ToolRegistry) -> None:
     assert RunOutcome.model_validate_json(outcome.model_dump_json()) == outcome
 
 
+def test_an_outcome_needs_a_final_status() -> None:
+    unfinished = AgentState(run_id="run", question="Question?", started_at=0.0)
+
+    with pytest.raises(ValueError, match="final status"):
+        RunOutcome.from_state(unfinished)
+
+
 def nodes_with(clock: FakeClock | None = None, **budget: float) -> AgentNodes:
     return AgentNodes(
         ScriptedChatModel([]), ToolRegistry([]), config_with(**budget), clock or FakeClock()
