@@ -152,7 +152,9 @@ def test_maps_the_usage_including_cache_tokens() -> None:
         output_tokens=5,
         cache_creation_input_tokens=3,
         cache_read_input_tokens=2,
-        cache_creation=types.CacheCreation(ephemeral_1h_input_tokens=1, ephemeral_5m_input_tokens=2),
+        cache_creation=types.CacheCreation(
+            ephemeral_1h_input_tokens=1, ephemeral_5m_input_tokens=2
+        ),
     )
 
     reply = adapter_for(StubMessages(sdk_message([], usage))).complete(a_request())
