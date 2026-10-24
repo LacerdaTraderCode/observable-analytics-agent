@@ -57,11 +57,7 @@ def a_request() -> ModelRequest:
         messages=[
             text_message("user", "How many orders?"),
             text_message("assistant", "Let me check."),
-            ModelRequest.model_construct(messages=[]).messages
-            or text_message("user", "unused"),
-        ][:2]
-        + [
-            text_message("user", "continue"),
+            text_message("user", "Continue."),
         ],
         tools=[
             ToolDefinition(
