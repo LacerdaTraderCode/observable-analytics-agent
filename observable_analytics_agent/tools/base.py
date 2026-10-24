@@ -3,7 +3,7 @@
 import json
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Protocol
 
 from pydantic import BaseModel, ValidationError
 
