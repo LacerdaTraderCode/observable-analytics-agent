@@ -87,7 +87,10 @@ from observable_analytics_agent.agent.graph import AgentConfig
 from observable_analytics_agent.agent.runner import AnalystAgent
 from observable_analytics_agent.dataset.generator import ensure_dataset
 from observable_analytics_agent.models.scripted import (
-    ScriptedChatModel, submit_answer_call, tool_call, tool_use_reply,
+    ScriptedChatModel,
+    submit_answer_call,
+    tool_call,
+    tool_use_reply,
 )
 from observable_analytics_agent.tools.factory import build_tool_registry
 from observable_analytics_agent.tools.glossary import LocalGlossary, load_glossary
