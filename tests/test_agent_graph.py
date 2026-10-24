@@ -266,7 +266,9 @@ def test_the_step_budget_ends_a_run_that_never_answers(tool_registry: ToolRegist
 
 
 def test_the_last_allowed_step_can_still_submit_the_answer(tool_registry: ToolRegistry) -> None:
-    model = ScriptedChatModel([tool_use_reply(query("SELECT 1")), tool_use_reply(submit_answer_call(1))])
+    model = ScriptedChatModel(
+        [tool_use_reply(query("SELECT 1")), tool_use_reply(submit_answer_call(1))]
+    )
 
     outcome = agent_with(model, tool_registry, max_steps=2).run("Question?")
 
