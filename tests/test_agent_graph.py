@@ -128,8 +128,12 @@ def test_every_request_carries_the_system_prompt_the_tools_and_the_conversation(
 def test_a_failing_query_is_returned_to_the_model_and_retried(tool_registry: ToolRegistry) -> None:
     model = ScriptedChatModel(
         [
-            tool_use_reply(query("SELECT count(*) FROM orders WHERE order_date > DATE '2025-01-01'")),
-            tool_use_reply(query("SELECT count(*) FROM orders WHERE ordered_at > DATE '2025-01-01'")),
+            tool_use_reply(
+                query("SELECT count(*) FROM orders WHERE order_date > DATE '2025-01-01'")
+            ),
+            tool_use_reply(
+                query("SELECT count(*) FROM orders WHERE ordered_at > DATE '2025-01-01'")
+            ),
             tool_use_reply(submit_answer_call(1)),
         ]
     )
