@@ -81,6 +81,8 @@ graph TD;
 **Models.** The agent depends on a small `ChatModel` interface, so a test can inject a `ScriptedChatModel` and the Anthropic adapter never needs the network in tests. Message blocks keep fields they do not know: models with adaptive thinking return thinking blocks that the API requires back unchanged, and the adapter round-trips them.
 
 ```python
+from pathlib import Path
+
 from observable_analytics_agent.agent.graph import AgentConfig
 from observable_analytics_agent.agent.runner import AnalystAgent
 from observable_analytics_agent.dataset.generator import ensure_dataset
