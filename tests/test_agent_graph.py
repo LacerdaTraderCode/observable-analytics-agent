@@ -388,11 +388,16 @@ def test_after_the_tools_the_run_continues_until_there_is_an_answer() -> None:
 
 
 def test_after_the_tools_an_answer_ends_the_run() -> None:
-    answer = submit_answer_call(1)
-    state = state_after(tool_use_reply(answer), steps_taken=1)
-    state.answer = ToolRegistry([]).execute("x", {}) and None
+    answer = FinalAnswer(status=AnswerStatus.ANSWERED, value=1.0, explanation="Counted.")
+    state = state_after(tool_use_reply(tool_call("submit_answer")), steps_taken=1, answer=answer)
 
-    assert nodes_with().route_after_tools(state) == "call_model"
+    assert nodes_with().route_after_tools(state) == "finish"
+
+
+def test_after_the_tools_a_spent_budget_ends_the_run() -> None:
+    state = state_after(tool_use_reply(tool_call("describe_schema")), steps_taken=3)
+
+    assert nodes_with(max_steps=3).route_after_tools(state) == "finish"
 
 
 def test_the_graph_has_the_documented_shape(tool_registry: ToolRegistry) -> None:
