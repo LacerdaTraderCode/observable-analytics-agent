@@ -52,6 +52,14 @@ class Tool(ABC):
         """Execute with arguments already validated against `arguments_model`."""
 
 
+class ToolExecutor(Protocol):
+    """What the agent needs from its tools, so a wrapper can observe every call."""
+
+    def definitions(self) -> list[ToolDefinition]: ...
+
+    def execute(self, name: str, raw_arguments: Mapping[str, Any]) -> ToolResult: ...
+
+
 class ToolRegistry:
     """Dispatches tool calls by name and turns every ToolError into a result the model can read."""
 
