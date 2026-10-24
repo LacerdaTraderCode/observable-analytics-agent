@@ -19,6 +19,7 @@ from observable_analytics_agent.agent.budget import Clock, RunBudget, exceeded_b
 from observable_analytics_agent.agent.state import AgentState, RunStatus
 from observable_analytics_agent.models.base import (
     ChatModel,
+    Message,
     ModelError,
     ModelRequest,
     text_message,
