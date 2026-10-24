@@ -9,6 +9,7 @@ from anthropic import types
 
 from observable_analytics_agent.models.anthropic_model import AnthropicChatModel
 from observable_analytics_agent.models.base import (
+    Message,
     ModelRequest,
     ModelUnavailable,
     text_message,
