@@ -227,8 +227,12 @@ def test_thinking_blocks_go_back_to_the_model_unchanged(tool_registry: ToolRegis
     }
 
 
-def test_a_reply_without_tool_calls_gets_one_reminder_to_submit(tool_registry: ToolRegistry) -> None:
-    model = ScriptedChatModel([text_reply("I think it is 5."), tool_use_reply(submit_answer_call(5))])
+def test_a_reply_without_tool_calls_gets_one_reminder_to_submit(
+    tool_registry: ToolRegistry,
+) -> None:
+    model = ScriptedChatModel(
+        [text_reply("I think it is 5."), tool_use_reply(submit_answer_call(5))]
+    )
 
     outcome = agent_with(model, tool_registry).run("Question?")
 
