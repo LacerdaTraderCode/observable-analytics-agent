@@ -2,6 +2,7 @@
 
 import json
 
+from observable_analytics_agent.agent.budget import RunBudget
 from observable_analytics_agent.agent.graph import (
     MAX_REMINDERS,
     SUBMIT_REMINDER,
@@ -9,7 +10,6 @@ from observable_analytics_agent.agent.graph import (
     AgentNodes,
     build_agent_graph,
 )
-from observable_analytics_agent.agent.budget import RunBudget
 from observable_analytics_agent.agent.runner import AnalystAgent
 from observable_analytics_agent.agent.state import AgentState, RunOutcome, RunStatus
 from observable_analytics_agent.dataset.generator import CUSTOMER_COUNT
