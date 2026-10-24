@@ -2,14 +2,14 @@
 
 An LLM data analyst agent that answers business questions about a bundled synthetic dataset by calling tools. It is built to be **observable** (traces, cost and latency per call, versioned prompts) and **evaluated** (a replay-based quality gate that fails the pull request when results drop).
 
-> **Status: work in progress.** The repository is delivered in seven milestones, one pull request each. Milestone 1 (dataset and tools) is what exists today. The agent graph, tracing, prompts, evaluation, API and Docker arrive in the next milestones, and this README grows with them.
+> **Status: work in progress.** The repository is delivered in seven milestones, one pull request each. Milestones 1 and 2 (dataset, tools, agent graph and model interface) are what exists today. Tracing, prompts, evaluation, API and Docker arrive in the next milestones, and this README grows with them.
 
 ## Milestones
 
 | # | Scope | Status |
 |---|-------|--------|
-| 1 | Repository, CI skeleton, synthetic dataset, tools with SQL safety tests | In review |
-| 2 | LangGraph agent and the model interface, with a scripted fake model | Planned |
+| 1 | Repository, CI skeleton, synthetic dataset, tools with SQL safety tests | Done |
+| 2 | LangGraph agent and the model interface, with a scripted fake model | In review |
 | 3 | OpenTelemetry tracing, cost, latency, DuckDB run ledger and report command | Planned |
 | 4 | Prompt registry with versions and content hashes | Planned |
 | 5 | Evaluation harness, golden tasks, record and replay, baseline and CI gate | Planned |
@@ -39,12 +39,69 @@ Each tool validates its arguments with Pydantic. Failures the model can fix (a w
 
 The SQL tool defends itself in two independent layers:
 
-1. **Static guard.** The text must hold exactly one statement, start with `SELECT` or `WITH`, and be classified as a SELECT by the DuckDB parser. Multiple statements, `COPY`, `ATTACH`, `INSTALL`, `LOAD`, `SET`, `PRAGMA`, `EXPORT` and every write are refused before anything runs.
+1. **Static guard.** The text must hold exactly one statement, start with `SELECT` or `WITH`, and be classified as a SELECT by the DuckDB parser. Multiple statements, `COPY`, `ATTACH`, `INSTALL`, `LOAD`, `SET`, `PRAGMA`, `EXPORT` and every write are refused before anything runs. The keyword scan is a single-pass scanner, not a regular expression, because comment-skipping patterns backtrack exponentially on crafted input (CodeQL caught this in an earlier version).
 2. **Sandboxed connection.** The database is opened read-only with `enable_external_access` off, extension auto-install and auto-load off, a single thread and a memory limit, and the configuration is locked afterwards. File-reading table functions such as `read_csv`, `read_text` and `glob` fail even if the guard has a gap.
 
 Results are capped at 50 rows, long text cells are truncated, and a query that runs longer than 5 seconds is interrupted.
 
 The tests attack both layers: stacked statements, statements hidden behind comments, `COPY`, `ATTACH`, `INSTALL`/`LOAD`, file reads through table functions, URL reads, configuration changes and every write statement. They also check that the dataset fingerprint is unchanged afterwards.
+
+### The agent
+
+The agent is an explicit LangGraph `StateGraph` with typed Pydantic state, named nodes and conditional edges. It does not use a prebuilt agent helper: the graph is part of what this project shows.
+
+```mermaid
+graph TD;
+    start([start]) --> call_model;
+    call_model -.-> run_tools;
+    call_model -.-> remind_to_submit;
+    call_model -.-> finish;
+    run_tools -.-> call_model;
+    run_tools -.-> finish;
+    remind_to_submit --> call_model;
+    finish --> stop([end]);
+```
+
+- `call_model` sends the conversation, the system prompt and the tool definitions to the model.
+- `run_tools` executes every tool call of the reply and answers them all in one user message. A tool that fails returns an error result, so the model can fix its query and try again.
+- `remind_to_submit` runs once when a reply holds no tool call, asking the model to call `submit_answer`.
+- `finish` records the final status.
+
+**Budgets.** A run has a step budget (model calls), a token budget (tokens billed across all calls) and a timeout. They are checked before another model call starts, never after one finishes, so a valid answer is not thrown away because it used the last allowed step.
+
+| Final status | Meaning |
+|--------------|---------|
+| `completed` | `submit_answer` was called. The answer itself may say `cannot_answer`. |
+| `step_budget_exceeded` | The model used all its calls without answering. |
+| `token_budget_exceeded` | The tokens billed so far reached the limit. |
+| `timed_out` | The wall-clock limit was reached. |
+| `no_answer` | The model stopped calling tools without submitting, even after a reminder. |
+| `model_failed` | The provider could not be reached. The run ends with a status instead of an exception. |
+
+**Models.** The agent depends on a small `ChatModel` interface, so a test can inject a `ScriptedChatModel` and the Anthropic adapter never needs the network in tests. Message blocks keep fields they do not know: models with adaptive thinking return thinking blocks that the API requires back unchanged, and the adapter round-trips them.
+
+```python
+from pathlib import Path
+
+from observable_analytics_agent.agent.graph import AgentConfig
+from observable_analytics_agent.agent.runner import AnalystAgent
+from observable_analytics_agent.dataset.generator import ensure_dataset
+from observable_analytics_agent.models.scripted import (
+    ScriptedChatModel, submit_answer_call, tool_call, tool_use_reply,
+)
+from observable_analytics_agent.tools.factory import build_tool_registry
+from observable_analytics_agent.tools.glossary import LocalGlossary, load_glossary
+from observable_analytics_agent.tools.sql_runner import ReadOnlyDatabase
+
+database = ReadOnlyDatabase(ensure_dataset(Path("var/analytics.duckdb")))
+tools = build_tool_registry(database, LocalGlossary(load_glossary()))
+model = ScriptedChatModel([
+    tool_use_reply(tool_call("run_read_only_query", {"sql": "SELECT count(*) FROM customers"})),
+    tool_use_reply(submit_answer_call(1500)),
+])
+agent = AnalystAgent(model, tools, AgentConfig(model="scripted", system_prompt="You are an analyst."))
+print(agent.run("How many customers are there?").status)  # completed
+```
 
 ## Quick start
 
@@ -62,6 +119,8 @@ pytest
 observable_analytics_agent/
   dataset/    schema, vocabulary and the seeded generator
   tools/      the four tools, the registry and the SQL safety layers
+  models/     the ChatModel interface, the scripted model and the Anthropic adapter
+  agent/      typed state, budgets, the StateGraph and the runner
 glossary/     business glossary used by search_business_glossary
 tests/        offline, deterministic tests
 ```
@@ -69,6 +128,8 @@ tests/        offline, deterministic tests
 ## Dependencies
 
 Every runtime and development dependency is pinned to an exact version in `requirements.txt` and `requirements-dev.txt`. `constraints.txt` locks the whole dependency tree and was resolved with a cutoff that excludes releases younger than 14 days. Dependabot follows the same rule through a 14-day cooldown.
+
+Code scanning runs on every pull request. It already caught one real finding in this repository, a regular expression with exponential backtracking, which was fixed instead of suppressed.
 
 ## License
 
