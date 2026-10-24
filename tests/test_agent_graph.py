@@ -32,7 +32,7 @@ from observable_analytics_agent.models.scripted import (
     tool_use_reply,
 )
 from observable_analytics_agent.tools.base import ToolRegistry
-from observable_analytics_agent.tools.final_answer import AnswerStatus
+from observable_analytics_agent.tools.final_answer import AnswerStatus, FinalAnswer
 
 SYSTEM_PROMPT = "You are a careful data analyst."
 MODEL_NAME = "test-model"
