@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 from observable_analytics_agent.agent.budget import RunBudget
 from observable_analytics_agent.agent.graph import (
     MAX_REMINDERS,
