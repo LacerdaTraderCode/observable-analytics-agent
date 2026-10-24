@@ -359,7 +359,9 @@ def nodes_with(clock: FakeClock | None = None, **budget: float) -> AgentNodes:
 
 def state_after(reply: ModelReply, **fields) -> AgentState:
     messages = [text_message("user", "Question?"), Message(role="assistant", content=reply.content)]
-    return AgentState(run_id="run", question="Question?", started_at=0.0, messages=messages, **fields)
+    return AgentState(
+        run_id="run", question="Question?", started_at=0.0, messages=messages, **fields
+    )
 
 
 def test_a_reply_with_tool_calls_goes_to_the_tools() -> None:
