@@ -100,9 +100,7 @@ def test_sends_tool_results_as_blocks_of_a_user_message() -> None:
     messages = StubMessages(sdk_message([types.TextBlock(type="text", text="ok")]))
     request = a_request()
     request.messages.append(
-        text_message("user", "x").model_copy(
-            update={"content": [tool_result_block("toolu_1", "{}", False)]}
-        )
+        Message(role="user", content=[tool_result_block("toolu_1", "{}", False)])
     )
 
     adapter_for(messages).complete(request)
