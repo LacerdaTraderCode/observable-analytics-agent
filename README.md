@@ -98,11 +98,15 @@ from observable_analytics_agent.tools.sql_runner import ReadOnlyDatabase
 
 database = ReadOnlyDatabase(ensure_dataset(Path("var/analytics.duckdb")))
 tools = build_tool_registry(database, LocalGlossary(load_glossary()))
-model = ScriptedChatModel([
-    tool_use_reply(tool_call("run_read_only_query", {"sql": "SELECT count(*) FROM customers"})),
-    tool_use_reply(submit_answer_call(1500)),
-])
-agent = AnalystAgent(model, tools, AgentConfig(model="scripted", system_prompt="You are an analyst."))
+model = ScriptedChatModel(
+    [
+        tool_use_reply(tool_call("run_read_only_query", {"sql": "SELECT count(*) FROM customers"})),
+        tool_use_reply(submit_answer_call(1500)),
+    ]
+)
+agent = AnalystAgent(
+    model, tools, AgentConfig(model="scripted", system_prompt="You are an analyst.")
+)
 print(agent.run("How many customers are there?").status)  # completed
 ```
 
