@@ -48,30 +48,6 @@ SLOW_CALL_SECONDS = 100.0
 SHORT_TIMEOUT_SECONDS = 60.0
 
 
-class FakeClock:
-    def __init__(self) -> None:
-        self.seconds = 0.0
-
-    def __call__(self) -> float:
-        return self.seconds
-
-    def advance(self, seconds: float) -> None:
-        self.seconds += seconds
-
-
-class ClockAdvancingModel:
-    """Makes every model call take `seconds` on the fake clock."""
-
-    def __init__(self, inner: ScriptedChatModel, clock: FakeClock, seconds: float) -> None:
-        self._inner = inner
-        self._clock = clock
-        self._seconds = seconds
-
-    def complete(self, request):
-        self._clock.advance(self._seconds)
-        return self._inner.complete(request)
-
-
 def config_with(**budget: float) -> AgentConfig:
     return AgentConfig(model=MODEL_NAME, system_prompt=SYSTEM_PROMPT, budget=RunBudget(**budget))
 
