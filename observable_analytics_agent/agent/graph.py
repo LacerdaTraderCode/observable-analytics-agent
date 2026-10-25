@@ -122,7 +122,7 @@ class AgentNodes:
         return self._exceeded(state) or RunStatus.NO_ANSWER
 
 
-def build_agent_graph(model: ChatModel, tools: ToolRegistry, config: AgentConfig, clock: Clock):
+def build_agent_graph(model: ChatModel, tools: ToolExecutor, config: AgentConfig, clock: Clock):
     nodes = AgentNodes(model, tools, config, clock)
     graph = StateGraph(AgentState)
     graph.add_node("call_model", nodes.call_model)
