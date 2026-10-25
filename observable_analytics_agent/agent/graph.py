@@ -47,7 +47,7 @@ class AgentNodes:
     """The node functions and routers of the graph, sharing the run's dependencies."""
 
     def __init__(
-        self, model: ChatModel, tools: ToolRegistry, config: AgentConfig, clock: Clock
+        self, model: ChatModel, tools: ToolExecutor, config: AgentConfig, clock: Clock
     ) -> None:
         self._model = model
         self._tools = tools
