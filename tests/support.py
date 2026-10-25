@@ -1,9 +1,18 @@
 """Test doubles shared by several test modules."""
 
-from datetime import date
+from collections.abc import Sequence
+from datetime import date, datetime
 
-from observable_analytics_agent.models.base import ChatModel, ModelReply, ModelRequest
+from observable_analytics_agent.agent.state import RunStatus
+from observable_analytics_agent.models.base import ChatModel, ModelReply, ModelRequest, TokenUsage
 from observable_analytics_agent.observability.pricing import ModelPricing, PriceTier, PricingTable
+from observable_analytics_agent.observability.records import (
+    PromptStamp,
+    RunRecord,
+    StepKind,
+    StepOutcome,
+    StepRecord,
+)
 
 PRICED_MODEL = "priced-model"
 FAKE_INPUT_PRICE = 1.0
