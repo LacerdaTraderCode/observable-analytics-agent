@@ -222,9 +222,10 @@ class RunRecorder:
 
     def _reply_attributes(self, reply: ModelReply, step: StepRecord) -> dict[str, Any]:
         usage = reply.usage
+        finish_reasons = [reply.stop_reason] if reply.stop_reason else []
         attributes: dict[str, Any] = {
             semconv.GEN_AI_RESPONSE_MODEL: reply.model,
-            semconv.GEN_AI_RESPONSE_FINISH_REASONS: [reply.stop_reason] if reply.stop_reason else [],
+            semconv.GEN_AI_RESPONSE_FINISH_REASONS: finish_reasons,
             semconv.GEN_AI_USAGE_INPUT_TOKENS: usage.input_tokens,
             semconv.GEN_AI_USAGE_OUTPUT_TOKENS: usage.output_tokens,
             semconv.GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS: usage.cache_creation_input_tokens,
