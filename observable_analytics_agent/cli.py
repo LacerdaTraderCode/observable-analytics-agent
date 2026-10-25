@@ -47,7 +47,19 @@ def run_generate_dataset(path: Path, seed: int) -> int:
     return 0
 
 
+def run_report(ledger_path: Path) -> int:
+    try:
+        report = build_report(RunLedger(ledger_path))
+    except LedgerNotFoundError as error:
+        logger.error("%s", error)
+        return 1
+    sys.stdout.write(render_report(report))
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     arguments = build_parser().parse_args(argv)
+    if arguments.command == "report":
+        return run_report(arguments.ledger)
     return run_generate_dataset(arguments.path, arguments.seed)
