@@ -113,7 +113,7 @@ def test_haiku_prices_change_above_one_hundred_thousand_prompt_tokens() -> None:
     long_prompt = TokenUsage(input_tokens=TIER_LIMIT + 1)
 
     assert table.cost_usd("claude-haiku-5-5", short_prompt) == pytest.approx(0.01)
-    assert table.cost_usd("claude-haiku-5-5", long_prompt) == pytest.approx(0.050001)
+    assert table.cost_usd("claude-haiku-5-5", long_prompt) == pytest.approx(0.0500005)
 
 
 def test_a_typical_agent_step_costs_a_fraction_of_a_cent_on_haiku() -> None:
