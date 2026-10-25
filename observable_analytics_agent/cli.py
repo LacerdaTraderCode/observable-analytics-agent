@@ -2,10 +2,17 @@
 
 import argparse
 import logging
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
 from observable_analytics_agent.dataset.generator import DEFAULT_SEED, generate_dataset
+from observable_analytics_agent.observability.ledger import (
+    DEFAULT_LEDGER_PATH,
+    LedgerNotFoundError,
+    RunLedger,
+)
+from observable_analytics_agent.observability.report import build_report, render_report
 
 logger = logging.getLogger(__name__)
 
