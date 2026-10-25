@@ -30,6 +30,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     generate.add_argument("--path", type=Path, default=DEFAULT_DATASET_PATH)
     generate.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    report = commands.add_parser(
+        "report",
+        help="Print cost, latency, success rate and tool error rate from the run ledger.",
+    )
+    report.add_argument("--ledger", type=Path, default=DEFAULT_LEDGER_PATH)
     return parser
 
 
