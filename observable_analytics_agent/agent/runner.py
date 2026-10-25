@@ -19,7 +19,7 @@ class AnalystAgent:
     def __init__(
         self,
         model: ChatModel,
-        tools: ToolRegistry,
+        tools: ToolExecutor,
         config: AgentConfig,
         clock: Clock = time.monotonic,
     ) -> None:
