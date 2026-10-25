@@ -25,7 +25,7 @@ from observable_analytics_agent.models.base import (
     text_message,
     tool_result_block,
 )
-from observable_analytics_agent.tools.base import ToolRegistry
+from observable_analytics_agent.tools.base import ToolExecutor
 
 DEFAULT_MAX_OUTPUT_TOKENS = 4096
 MAX_REMINDERS = 1
