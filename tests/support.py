@@ -61,3 +61,60 @@ def fake_pricing() -> PricingTable:
         currency="USD",
         models={PRICED_MODEL: ModelPricing(tiers=[tier])},
     )
+
+
+def a_run_record(
+    run_id: str = "run-1",
+    *,
+    prompt_version: str = "1.0.0",
+    status: RunStatus = RunStatus.COMPLETED,
+    cost_usd: float | None = 0.001,
+    latency_seconds: float = 1.0,
+    task_id: str | None = None,
+    tool_outcomes: Sequence[StepOutcome] = (StepOutcome.OK,),
+) -> RunRecord:
+    prompt = PromptStamp(
+        name="analyst_system", version=prompt_version, content_hash=f"hash-{prompt_version}"
+    )
+    usage = TokenUsage(input_tokens=100, output_tokens=20)
+    model_step = StepRecord(
+        step_index=0,
+        kind=StepKind.LLM,
+        name=PRICED_MODEL,
+        started_offset_seconds=0.0,
+        duration_seconds=0.5,
+        outcome=StepOutcome.OK,
+        finish_reason="tool_use",
+        usage=usage,
+        cost_usd=cost_usd,
+        prompt=prompt,
+    )
+    tool_steps = [
+        StepRecord(
+            step_index=index + 1,
+            kind=StepKind.TOOL,
+            name="run_read_only_query",
+            started_offset_seconds=0.5,
+            duration_seconds=0.01,
+            outcome=outcome,
+            error_code="query_failed" if outcome is StepOutcome.ERROR else None,
+            arguments='{"sql":"SELECT 1"}',
+        )
+        for index, outcome in enumerate(tool_outcomes)
+    ]
+    completed = status is RunStatus.COMPLETED
+    return RunRecord(
+        run_id=run_id,
+        task_id=task_id,
+        started_at=datetime(2026, 10, 1, 12, 0, 0),
+        question="How many orders?",
+        model=PRICED_MODEL,
+        prompt=prompt,
+        status=status,
+        answer_status="answered" if completed else None,
+        answer_value="42.0" if completed else None,
+        steps=[model_step, *tool_steps],
+        usage=usage,
+        cost_usd=cost_usd,
+        latency_seconds=latency_seconds,
+    )
