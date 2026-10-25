@@ -144,6 +144,8 @@ observable_analytics_agent/
   tools/      the four tools, the registry and the SQL safety layers
   models/     the ChatModel interface, the scripted model and the Anthropic adapter
   agent/      typed state, budgets, the StateGraph and the runner
+  observability/  recorder, spans, pricing, run ledger and report
+config/       versioned price table
 glossary/     business glossary used by search_business_glossary
 tests/        offline, deterministic tests
 ```
