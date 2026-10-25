@@ -110,6 +110,22 @@ agent = AnalystAgent(
 print(agent.run("How many customers are there?").status)  # completed
 ```
 
+### Observability
+
+`ObservedAnalystAgent` wraps the model and the tools with a recorder, so the graph itself carries no observability code and a scripted model is observed exactly like a real one.
+
+- **Traces.** One span per run (`invoke_agent`), one per model call (`chat <model>`) and one per tool call (`execute_tool <name>`), all in one trace. Attribute names follow the OpenTelemetry GenAI semantic conventions, which are still in Development status, so every name lives in one module (`observability/semconv.py`) and a test pins it. Cost and prompt version have no standard attribute and use the `agent.*` namespace. Spans go to the console on stderr by default, so answers stay alone on stdout, and to an OTLP collector when an endpoint is configured.
+- **Per model call:** model, prompt name, version and content hash, input and output tokens (cache tokens included when the API reports them), cost in USD and latency. **Per tool call:** name, arguments, duration, and the outcome or the error code.
+- **Cost** is computed from the usage the API returns and a price table in `config/pricing.json`, stamped with an `as_of` date and the page it was read from. The table models tiers by prompt length (Haiku 5.5 changes price above 100,000 prompt tokens, cache reads and writes included) and the separate 5-minute and 1-hour cache write rates. A model with no listed price gets a NULL cost, never a guess.
+- **Latency** uses a monotonic clock, per call and per run, and the clock is injected so tests control time.
+- **Run ledger.** Every run is also stored in a DuckDB file (`runs` and `steps` tables), so everything above is queryable with SQL. Connections are opened per operation and closed right after, because DuckDB allows one writer process per file.
+
+```bash
+python -m observable_analytics_agent report --ledger var/ledger.duckdb
+```
+
+The report prints, broken down by prompt version, the number of runs, success rate, average and total cost, latency p50 and p95, then cost and latency per task, and the error rate of each tool. A run counts as a success here when the agent ended with `completed`. Whether the answer is right is the job of the evaluation (milestone 5), which has the reference queries.
+
 ## Quick start
 
 ```bash
