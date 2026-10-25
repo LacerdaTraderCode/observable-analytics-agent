@@ -15,6 +15,8 @@ from observable_analytics_agent.dataset.generator import (
     _oldest_open_high_priority,
     summarize_database,
 )
+from observable_analytics_agent.observability.ledger import RunLedger
+from tests.support import a_run_record
 
 
 def test_generate_dataset_writes_the_file_and_reports_the_tables(
