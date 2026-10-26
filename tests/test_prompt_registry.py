@@ -199,7 +199,7 @@ def test_editing_a_shipped_prompt_in_place_is_caught(tmp_path: Path) -> None:
     baseline = copied / "analyst_system" / "1.0.0.md"
     baseline.write_text(baseline.read_text(encoding="utf-8") + "Be brief.\n", encoding="utf-8")
 
-    with pytest.raises(PromptIntegrityError, match="analyst_system 1.0.0"):
+    with pytest.raises(PromptIntegrityError, match=r"analyst_system 1\.0\.0"):
         PromptRegistry.load(copied)
 
 
