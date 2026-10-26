@@ -135,7 +135,7 @@ def test_a_whitespace_edit_is_an_edit_too(prompts_dir: Path) -> None:
 def test_a_missing_prompt_file_is_reported(prompts_dir: Path) -> None:
     (prompts_dir / "other_prompt" / "0.1.0.md").unlink()
 
-    with pytest.raises(PromptManifestError, match="cannot read other_prompt/0.1.0.md"):
+    with pytest.raises(PromptManifestError, match=r"cannot read other_prompt/0\.1\.0\.md"):
         PromptRegistry.load(prompts_dir)
 
 
