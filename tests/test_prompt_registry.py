@@ -152,7 +152,7 @@ def test_a_manifest_entry_cannot_point_outside_the_directory(tmp_path: Path) -> 
 def test_the_same_version_cannot_be_listed_twice(prompts_dir: Path) -> None:
     rewrite_manifest(prompts_dir, lambda entries: entries.append(dict(entries[0])))
 
-    with pytest.raises(PromptManifestError, match="analyst_system 1.9.0 twice"):
+    with pytest.raises(PromptManifestError, match=r"analyst_system 1\.9\.0 twice"):
         PromptRegistry.load(prompts_dir)
 
 
