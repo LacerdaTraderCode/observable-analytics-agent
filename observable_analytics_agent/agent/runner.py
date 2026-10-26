@@ -7,7 +7,7 @@ from observable_analytics_agent.agent.budget import Clock, RunBudget
 from observable_analytics_agent.agent.graph import AgentConfig, build_agent_graph
 from observable_analytics_agent.agent.state import AgentState, RunOutcome
 from observable_analytics_agent.models.base import ChatModel, text_message
-from observable_analytics_agent.tools.base import ToolRegistry
+from observable_analytics_agent.tools.base import ToolExecutor
 
 SUPERSTEPS_PER_MODEL_CALL = 3
 RECURSION_MARGIN = 5
@@ -19,7 +19,7 @@ class AnalystAgent:
     def __init__(
         self,
         model: ChatModel,
-        tools: ToolRegistry,
+        tools: ToolExecutor,
         config: AgentConfig,
         clock: Clock = time.monotonic,
     ) -> None:

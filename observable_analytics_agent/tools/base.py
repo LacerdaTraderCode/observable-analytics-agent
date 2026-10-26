@@ -3,7 +3,7 @@
 import json
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Protocol
 
 from pydantic import BaseModel, ValidationError
 
@@ -50,6 +50,14 @@ class Tool(ABC):
     @abstractmethod
     def run(self, arguments: Any) -> ToolResult:
         """Execute with arguments already validated against `arguments_model`."""
+
+
+class ToolExecutor(Protocol):
+    """What the agent needs from its tools, so a wrapper can observe every call."""
+
+    def definitions(self) -> list[ToolDefinition]: ...
+
+    def execute(self, name: str, raw_arguments: Mapping[str, Any]) -> ToolResult: ...
 
 
 class ToolRegistry:

@@ -25,7 +25,7 @@ from observable_analytics_agent.models.base import (
     text_message,
     tool_result_block,
 )
-from observable_analytics_agent.tools.base import ToolRegistry
+from observable_analytics_agent.tools.base import ToolExecutor
 
 DEFAULT_MAX_OUTPUT_TOKENS = 4096
 MAX_REMINDERS = 1
@@ -47,7 +47,7 @@ class AgentNodes:
     """The node functions and routers of the graph, sharing the run's dependencies."""
 
     def __init__(
-        self, model: ChatModel, tools: ToolRegistry, config: AgentConfig, clock: Clock
+        self, model: ChatModel, tools: ToolExecutor, config: AgentConfig, clock: Clock
     ) -> None:
         self._model = model
         self._tools = tools
@@ -122,7 +122,7 @@ class AgentNodes:
         return self._exceeded(state) or RunStatus.NO_ANSWER
 
 
-def build_agent_graph(model: ChatModel, tools: ToolRegistry, config: AgentConfig, clock: Clock):
+def build_agent_graph(model: ChatModel, tools: ToolExecutor, config: AgentConfig, clock: Clock):
     nodes = AgentNodes(model, tools, config, clock)
     graph = StateGraph(AgentState)
     graph.add_node("call_model", nodes.call_model)
