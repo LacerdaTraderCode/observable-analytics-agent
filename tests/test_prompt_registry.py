@@ -221,4 +221,6 @@ def test_prompts_only_name_tools_and_fields_that_exist(tool_registry) -> None:
 
     for prompt in PromptRegistry.load().all():
         mentioned = set(re.findall(r"\b[a-z]+(?:_[a-z]+)+\b", prompt.text))
-        assert mentioned <= known_names, f"{prompt.name} {prompt.version} names {mentioned - known_names}"
+        assert mentioned <= known_names, (
+            f"{prompt.name} {prompt.version} names {mentioned - known_names}"
+        )
