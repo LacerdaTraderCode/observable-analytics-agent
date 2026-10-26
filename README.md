@@ -126,6 +126,27 @@ python -m observable_analytics_agent report --ledger var/ledger.duckdb
 
 The report prints, broken down by prompt version, the number of runs, success rate, average and total cost, latency p50 and p95, then cost and latency per task, and the error rate of each tool. A run counts as a success here when the agent ended with `completed`. Whether the answer is right is the job of the evaluation (milestone 5), which has the reference queries.
 
+### Prompt versioning
+
+Prompts are files under `prompts/`, and `prompts/manifest.json` declares for every version its file, a one-line changelog and the SHA-256 of the file bytes. The registry recomputes the hash on load and **rejects a prompt that was edited without a new version**. The error says what to do instead: add a new version file and a manifest entry. That matters because a trace, a ledger row or a recorded model reply that names `analyst_system 1.0.0` has to keep meaning the same text. `.gitattributes` pins line endings so the hash is the same on every platform.
+
+```bash
+python -m observable_analytics_agent prompts list     # versions, short hashes, changelogs
+python -m observable_analytics_agent prompts verify   # check every file against the manifest
+python -m observable_analytics_agent prompts hash prompts/analyst_system/3.0.0.md
+```
+
+The registry hands out a stamp (name, version, hash) that the observed agent writes on every span and every ledger row, so the report can compare prompt versions.
+
+Two versions of the main system prompt ship so the evaluation can compare them:
+
+| Version | Changelog |
+|---------|-----------|
+| `analyst_system` 1.0.0 | Minimal baseline: say what the assistant is and which tools to use. |
+| `analyst_system` 2.0.0 | Add a working method, the rule that tool output is data, the read-only rule and the cannot_answer rule. |
+
+Whether 2.0.0 actually beats 1.0.0 is a question for the evaluation (milestone 5), not something this README claims. The two versions exist so the answer can be measured.
+
 ## Quick start
 
 ```bash
@@ -133,6 +154,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt -c constraints.txt
 
 python -m observable_analytics_agent generate-dataset   # writes var/analytics.duckdb
+python -m observable_analytics_agent prompts verify
 pytest
 ```
 
