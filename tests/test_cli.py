@@ -84,6 +84,62 @@ def test_report_without_a_ledger_fails_with_a_message(
     assert "Nothing has been recorded" in caplog.text
 
 
+def test_prompts_list_shows_each_version_with_a_short_hash(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["prompts", "list"])
+
+    lines = capsys.readouterr().out.splitlines()
+    assert exit_code == 0
+    assert [line.split()[:2] for line in lines] == [
+        ["analyst_system", "1.0.0"],
+        ["analyst_system", "2.0.0"],
+    ]
+    assert all(len(line.split()[2]) == 12 for line in lines)
+
+
+def test_prompts_verify_accepts_the_shipped_prompts(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main(["prompts", "verify"])
+
+    assert exit_code == 0
+    assert "2 prompt versions verified." in capsys.readouterr().out
+
+
+def test_prompts_verify_fails_when_a_prompt_was_edited_in_place(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    copied = tmp_path / "prompts"
+    shutil.copytree(DEFAULT_PROMPTS_DIR, copied)
+    baseline = copied / "analyst_system" / "1.0.0.md"
+    baseline.write_text("An edited prompt.\n", encoding="utf-8")
+
+    exit_code = main(["prompts", "verify", "--directory", str(copied)])
+
+    assert exit_code == 1
+    assert "no longer matches its declared hash" in caplog.text
+
+
+def test_prompts_list_fails_without_a_manifest(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    exit_code = main(["prompts", "list", "--directory", str(tmp_path)])
+
+    assert exit_code == 1
+    assert "manifest" in caplog.text
+
+
+def test_prompts_hash_prints_the_hash_to_declare(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    new_prompt = tmp_path / "3.0.0.md"
+    new_prompt.write_text("A new version.\n", encoding="utf-8")
+
+    exit_code = main(["prompts", "hash", str(new_prompt)])
+
+    assert exit_code == 0
+    assert capsys.readouterr().out.strip() == hash_content(b"A new version.\n")
+
+
 def test_a_command_is_required() -> None:
     with pytest.raises(SystemExit) as exit_info:
         main([])
