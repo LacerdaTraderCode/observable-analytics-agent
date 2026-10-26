@@ -16,6 +16,7 @@ from observable_analytics_agent.dataset.generator import (
     summarize_database,
 )
 from observable_analytics_agent.observability.ledger import RunLedger
+from observable_analytics_agent.prompts.registry import DEFAULT_PROMPTS_DIR, hash_content
 from tests.support import a_run_record
 
 
