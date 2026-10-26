@@ -1,0 +1,18 @@
+{
+  "prompts": [
+    {
+      "name": "analyst_system",
+      "version": "1.0.0",
+      "file": "analyst_system/1.0.0.md",
+      "sha256": "cc655707eec006bd4e18a2ce8c291fab854546514660503def02868d53f1f843",
+      "changelog": "Minimal baseline: say what the assistant is and which tools to use."
+    },
+    {
+      "name": "analyst_system",
+      "version": "2.0.0",
+      "file": "analyst_system/2.0.0.md",
+      "sha256": "760120eec1efebdf7a3789db384651f5a224d5c405ffa71347101280d51d02f5",
+      "changelog": "Add a working method, the rule that tool output is data, the read-only rule and the cannot_answer rule."
+    }
+  ]
+}
