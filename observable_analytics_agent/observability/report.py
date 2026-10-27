@@ -6,9 +6,9 @@ the reference queries; the ledger only knows how the runs went.
 """
 
 from dataclasses import dataclass
-from typing import Any
 
 from observable_analytics_agent.observability.ledger import RunLedger
+from observable_analytics_agent.text_table import render_table
 
 LATENCY_MEDIAN = 0.5
 LATENCY_TAIL = 0.95
