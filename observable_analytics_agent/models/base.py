@@ -95,10 +95,18 @@ class ModelRequest(BaseModel):
 
 
 class ModelReply(BaseModel):
+    """A model reply.
+
+    `latency_seconds` is set by recording models. A replayed reply carries the latency of the live
+    call it was recorded from, so latency budgets judge the recorded behavior instead of the
+    speed of reading a file.
+    """
+
     content: list[ContentBlock]
     model: str
     stop_reason: str | None = None
     usage: TokenUsage = Field(default_factory=TokenUsage)
+    latency_seconds: float | None = None
 
     @property
     def tool_calls(self) -> list[ToolCall]:
