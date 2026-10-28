@@ -126,3 +126,59 @@ def a_run_record(
         cost_usd=cost_usd,
         latency_seconds=latency_seconds,
     )
+
+
+def a_task_result(
+    task_id: str = "task",
+    *,
+    passed: bool = True,
+    cost_usd: float | None = 0.001,
+    step_durations: Sequence[float] = (1.0,),
+    model_calls: int = 3,
+    category: TaskCategory = TaskCategory.SINGLE_NUMBER,
+    requires_glossary: bool = False,
+    used_glossary: bool = False,
+    status: RunStatus = RunStatus.COMPLETED,
+    error: str | None = None,
+) -> TaskResult:
+    task = GoldenTask(
+        task_id=task_id,
+        question=f"Question {task_id}?",
+        category=category,
+        kind=AnswerKind.NUMBER,
+        requires_glossary=requires_glossary,
+    )
+    steps = [
+        StepRecord(
+            step_index=index,
+            kind=StepKind.LLM,
+            name=PRICED_MODEL,
+            started_offset_seconds=0.0,
+            duration_seconds=duration,
+            outcome=StepOutcome.OK,
+        )
+        for index, duration in enumerate(step_durations)
+    ]
+    record = a_run_record(cost_usd=cost_usd).model_copy(update={"steps": steps})
+    outcome = RunOutcome(
+        run_id="run",
+        question=task.question,
+        status=status,
+        answer=None,
+        steps_taken=model_calls,
+        usage=TokenUsage(),
+        error=error,
+        messages=[],
+    )
+    score = TaskScore(
+        task_id=task_id,
+        category=category,
+        passed=passed,
+        correct=passed,
+        used_sql=True,
+        used_glossary=used_glossary,
+        forbidden_operation=False,
+        leaked_instruction=False,
+        failures=() if passed else ("wrong answer",),
+    )
+    return TaskResult(task, ExpectedAnswer(kind=task.kind, number=1.0), outcome, record, score)
