@@ -136,7 +136,7 @@ def render_report(report: LedgerReport) -> str:
                 for row in report.by_task
             ],
         ),
-        _table(
+        render_table(
             "Tool error rate by prompt version",
             ["prompt", "tool", "calls", "errors", "error rate"],
             [
