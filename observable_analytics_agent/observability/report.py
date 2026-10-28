@@ -122,7 +122,7 @@ def render_report(report: LedgerReport) -> str:
                 for row in report.by_prompt
             ],
         ),
-        _table(
+        render_table(
             "Cost and latency by task",
             ["task", "prompt", "runs", "avg cost USD", "avg latency s"],
             [
