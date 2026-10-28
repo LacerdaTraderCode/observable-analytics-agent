@@ -106,7 +106,7 @@ def build_report(ledger: RunLedger) -> LedgerReport:
 
 def render_report(report: LedgerReport) -> str:
     sections = [
-        _table(
+        render_table(
             "Runs by prompt version",
             ["prompt", "runs", "success", "avg cost USD", "total cost USD", "p50 s", "p95 s"],
             [
