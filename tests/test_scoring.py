@@ -101,7 +101,7 @@ def score(task, expected, answer, *steps, status=RunStatus.COMPLETED):
         (100.02, False),
         ("100", True),
         ("$100.00", True),
-        ("1,00", False),
+        ("1,000", False),
         (["100"], True),
         ("about a hundred", False),
         (True, False),
