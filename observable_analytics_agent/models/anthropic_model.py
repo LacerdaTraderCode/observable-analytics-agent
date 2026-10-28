@@ -1,5 +1,6 @@
 """Adapter from the ChatModel interface to the Anthropic Messages API."""
 
+from collections.abc import Mapping
 from typing import Any
 
 import anthropic
