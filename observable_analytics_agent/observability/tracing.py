@@ -17,17 +17,21 @@ OTLP_TRACES_PATH = "/v1/traces"
 
 
 def build_tracer_provider(
-    otlp_endpoint: str | None = None, console_stream: TextIO | None = None
+    otlp_endpoint: str | None = None,
+    console_stream: TextIO | None = None,
+    *,
+    export_to_console: bool = True,
 ) -> TracerProvider:
     """Export to an OTLP collector when `otlp_endpoint` is set, otherwise print spans.
 
-    The console exporter writes to stderr by default so that answers stay alone on stdout.
+    The console exporter writes to stderr by default so that answers stay alone on stdout. An
+    evaluation produces hundreds of spans, so it asks for `export_to_console=False`.
     """
     provider = TracerProvider(resource=Resource.create({"service.name": SERVICE_NAME}))
     if otlp_endpoint:
         exporter = OTLPSpanExporter(endpoint=otlp_endpoint.rstrip("/") + OTLP_TRACES_PATH)
         provider.add_span_processor(BatchSpanProcessor(exporter))
-    else:
+    elif export_to_console:
         console = ConsoleSpanExporter(out=console_stream or sys.stderr)
         provider.add_span_processor(SimpleSpanProcessor(console))
     return provider
