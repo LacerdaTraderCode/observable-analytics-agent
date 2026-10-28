@@ -3,7 +3,15 @@
 from collections.abc import Sequence
 from datetime import date, datetime
 
-from observable_analytics_agent.agent.state import RunStatus
+from observable_analytics_agent.agent.state import RunOutcome, RunStatus
+from observable_analytics_agent.evaluation.results import TaskResult
+from observable_analytics_agent.evaluation.scoring import TaskScore
+from observable_analytics_agent.evaluation.tasks import (
+    AnswerKind,
+    ExpectedAnswer,
+    GoldenTask,
+    TaskCategory,
+)
 from observable_analytics_agent.models.base import ChatModel, ModelReply, ModelRequest, TokenUsage
 from observable_analytics_agent.observability.pricing import ModelPricing, PriceTier, PricingTable
 from observable_analytics_agent.observability.records import (
