@@ -101,7 +101,9 @@ def _success_rate_check(
     return GateCheck("success rate", metrics.success_rate >= minimum - COMPARISON_EPSILON, detail)
 
 
-def _cost_check(metrics: EvaluationMetrics, baseline: Baseline, limits: GateThresholds) -> GateCheck:
+def _cost_check(
+    metrics: EvaluationMetrics, baseline: Baseline, limits: GateThresholds
+) -> GateCheck:
     if metrics.average_cost_usd is None:
         return GateCheck("cost", False, "the cost is unknown: the model has no listed price")
     maximum = baseline.average_cost_usd * (1 + limits.max_cost_increase_ratio)
