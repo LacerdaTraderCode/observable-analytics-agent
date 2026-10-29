@@ -78,7 +78,8 @@ def test_every_run_is_stored_in_the_ledger_with_its_task_id(
     harness.run(GOLDEN_TASKS[:3])
 
     with ledger.read_connection() as connection:
-        task_ids = [row[0] for row in connection.execute("SELECT task_id FROM runs ORDER BY 1")]
+        rows = connection.execute("SELECT task_id FROM runs ORDER BY 1").fetchall()
+    task_ids = [row[0] for row in rows]
     assert task_ids == sorted(task.task_id for task in GOLDEN_TASKS[:3])
 
 
