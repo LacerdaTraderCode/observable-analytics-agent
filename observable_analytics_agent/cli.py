@@ -197,7 +197,9 @@ def _select_tasks(task_ids: list[str] | None) -> list[GoldenTask] | None:
 
 def _evaluate(arguments: argparse.Namespace) -> int:
     if arguments.gate and arguments.write_baseline:
-        logger.error("--gate and --write-baseline cannot be combined: a new baseline passes itself.")
+        logger.error(
+            "--gate and --write-baseline cannot be combined: a new baseline passes itself."
+        )
         return USAGE_ERROR
     if arguments.task_ids and (arguments.gate or arguments.write_baseline):
         logger.error("A subset of tasks cannot be gated or stored as a baseline.")
