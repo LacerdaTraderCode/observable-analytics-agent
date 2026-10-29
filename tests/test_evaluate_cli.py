@@ -1,7 +1,8 @@
 """The evaluate command: record, replay, baseline and gate, end to end with an oracle model."""
 
 import json
-import logging
+import shutil
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -14,25 +15,10 @@ from observable_analytics_agent.tools.sql_runner import ReadOnlyDatabase
 from tests.oracle import OracleModel
 
 REGRESSED_TASK_COUNT = 10
+Evaluate = Callable[..., int]
 
 
-@pytest.fixture
-def mistakes(monkeypatch: pytest.MonkeyPatch, database: ReadOnlyDatabase) -> set[str]:
-    """Make record and live runs talk to the oracle instead of the Anthropic API.
-
-    The returned set holds the task ids the oracle should answer wrongly.
-    """
-    wrong: set[str] = set()
-    monkeypatch.setattr(
-        runner,
-        "build_anthropic_model",
-        lambda environment, **_: OracleModel(database, wrong),
-    )
-    return wrong
-
-
-@pytest.fixture
-def evaluate(tmp_path: Path, dataset_path: Path):
+def evaluate_in(workspace: Path, dataset_path: Path) -> Evaluate:
     def run(*extra: str) -> int:
         return main(
             [
@@ -40,11 +26,11 @@ def evaluate(tmp_path: Path, dataset_path: Path):
                 "--dataset",
                 str(dataset_path),
                 "--ledger",
-                str(tmp_path / "ledger.duckdb"),
+                str(workspace / "ledger.duckdb"),
                 "--recordings-dir",
-                str(tmp_path / "recordings"),
+                str(workspace / "recordings"),
                 "--baseline",
-                str(tmp_path / "baseline.json"),
+                str(workspace / "baseline.json"),
                 *extra,
             ]
         )
@@ -52,14 +38,57 @@ def evaluate(tmp_path: Path, dataset_path: Path):
     return run
 
 
-def test_record_a_baseline_then_replay_it_through_the_gate(
-    tmp_path: Path, mistakes: set[str], evaluate, capsys: pytest.CaptureFixture[str]
-) -> None:
-    assert evaluate("--mode", "record", "--write-baseline") == 0
-    assert (tmp_path / "baseline.json").is_file()
-    assert list((tmp_path / "recordings").glob("*.json"))
-    capsys.readouterr()
+@pytest.fixture(scope="module")
+def recorded(tmp_path_factory: pytest.TempPathFactory, dataset_path: Path) -> Path:
+    """A workspace with recordings, a baseline and a ledger, made once by the oracle."""
+    workspace = tmp_path_factory.mktemp("recorded")
+    oracle = OracleModel(ReadOnlyDatabase(dataset_path))
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(runner, "build_anthropic_model", lambda environment, **_: oracle)
+        assert evaluate_in(workspace, dataset_path)("--mode", "record", "--write-baseline") == 0
+    return workspace
 
+
+@pytest.fixture
+def workspace(tmp_path: Path, recorded: Path) -> Path:
+    copy = tmp_path / "workspace"
+    shutil.copytree(recorded, copy)
+    return copy
+
+
+@pytest.fixture
+def evaluate(workspace: Path, dataset_path: Path) -> Evaluate:
+    return evaluate_in(workspace, dataset_path)
+
+
+@pytest.fixture
+def fresh_evaluate(tmp_path: Path, dataset_path: Path) -> Evaluate:
+    return evaluate_in(tmp_path / "fresh", dataset_path)
+
+
+@pytest.fixture
+def mistakes(monkeypatch: pytest.MonkeyPatch, database: ReadOnlyDatabase) -> set[str]:
+    """Make record and live runs talk to an oracle that answers these task ids wrongly."""
+    wrong: set[str] = set()
+    monkeypatch.setattr(
+        runner, "build_anthropic_model", lambda environment, **_: OracleModel(database, wrong)
+    )
+    return wrong
+
+
+def test_recording_writes_the_replies_and_the_baseline(recorded: Path) -> None:
+    baseline = json.loads((recorded / "baseline.json").read_text())
+
+    assert len(list((recorded / "recordings").glob("*.json"))) >= len(GOLDEN_TASKS)
+    assert baseline["task_count"] == len(GOLDEN_TASKS)
+    assert baseline["success_rate"] == 1.0
+    assert (baseline["prompt_name"], baseline["prompt_version"]) == ("analyst_system", "2.0.0")
+    assert baseline["average_cost_usd"] > 0
+
+
+def test_replaying_the_recordings_passes_the_gate(
+    evaluate: Evaluate, capsys: pytest.CaptureFixture[str]
+) -> None:
     exit_code = evaluate("--mode", "replay", "--gate")
 
     output = capsys.readouterr().out
@@ -69,9 +98,8 @@ def test_record_a_baseline_then_replay_it_through_the_gate(
 
 
 def test_replay_needs_no_api_key_and_never_calls_the_model(
-    tmp_path: Path, mistakes: set[str], evaluate, monkeypatch: pytest.MonkeyPatch
+    evaluate: Evaluate, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    evaluate("--mode", "record", "--write-baseline")
     monkeypatch.delenv(API_KEY_VARIABLE, raising=False)
     monkeypatch.setattr(runner, "build_anthropic_model", lambda *_, **__: pytest.fail("API used"))
 
@@ -79,9 +107,8 @@ def test_replay_needs_no_api_key_and_never_calls_the_model(
 
 
 def test_a_regression_recorded_against_the_model_fails_the_gate(
-    mistakes: set[str], evaluate, capsys: pytest.CaptureFixture[str]
+    evaluate: Evaluate, mistakes: set[str], capsys: pytest.CaptureFixture[str]
 ) -> None:
-    evaluate("--mode", "record", "--write-baseline")
     mistakes.update(task.task_id for task in GOLDEN_TASKS[:REGRESSED_TASK_COUNT])
     assert evaluate("--mode", "record") == 0
     capsys.readouterr()
@@ -96,11 +123,8 @@ def test_a_regression_recorded_against_the_model_fails_the_gate(
 
 
 def test_a_changed_prompt_has_no_recordings_and_the_gate_says_how_to_record(
-    mistakes: set[str], evaluate, capsys: pytest.CaptureFixture[str]
+    evaluate: Evaluate, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    evaluate("--mode", "record", "--write-baseline")
-    capsys.readouterr()
-
     exit_code = evaluate("--mode", "replay", "--gate", "--prompt-version", "1.0.0")
 
     output = capsys.readouterr().out
@@ -110,67 +134,24 @@ def test_a_changed_prompt_has_no_recordings_and_the_gate_says_how_to_record(
     assert "evaluation/recordings/" in output
 
 
-def test_the_gate_without_a_baseline_fails_and_says_how_to_create_one(
-    evaluate, caplog: pytest.LogCaptureFixture
+def test_the_gate_without_a_baseline_fails_fast_and_says_how_to_create_one(
+    workspace: Path,
+    evaluate: Evaluate,
+    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
+    (workspace / "baseline.json").unlink()
+
     exit_code = evaluate("--mode", "replay", "--gate")
 
     assert exit_code == 1
+    assert capsys.readouterr().out == ""
     assert "No baseline" in caplog.text
     assert "evaluate --mode record --write-baseline" in caplog.text
 
 
-def test_live_mode_does_not_store_recordings(
-    tmp_path: Path, mistakes: set[str], evaluate
-) -> None:
-    assert evaluate("--mode", "live", "--task", "count_customers") == 0
-
-    assert not (tmp_path / "recordings").exists()
-
-
-@pytest.mark.parametrize("mode", ["record", "live"])
-def test_record_and_live_modes_need_an_api_key(
-    mode: str, evaluate, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
-) -> None:
-    monkeypatch.delenv(API_KEY_VARIABLE, raising=False)
-
-    exit_code = evaluate("--mode", mode)
-
-    assert exit_code == 1
-    assert API_KEY_VARIABLE in caplog.text
-
-
-def test_a_subset_of_tasks_can_run_but_cannot_be_gated_or_stored(
-    mistakes: set[str], evaluate, capsys: pytest.CaptureFixture[str], caplog: pytest.LogCaptureFixture
-) -> None:
-    assert evaluate("--mode", "record", "--task", "count_customers", "--task", "total_orders") == 0
-    output = capsys.readouterr().out
-    assert "count_customers" in output
-    assert "total_orders" in output
-    assert "enterprise_customers" not in output
-
-    assert evaluate("--mode", "replay", "--task", "count_customers", "--gate") == 2
-    assert evaluate("--mode", "record", "--task", "count_customers", "--write-baseline") == 2
-    assert "subset" in caplog.text
-
-
-def test_an_unknown_task_is_a_usage_error(evaluate, caplog: pytest.LogCaptureFixture) -> None:
-    assert evaluate("--mode", "replay", "--task", "no_such_task") == 2
-    assert "Unknown task(s): no_such_task" in caplog.text
-
-
-def test_a_new_baseline_cannot_gate_itself(evaluate, caplog: pytest.LogCaptureFixture) -> None:
-    with caplog.at_level(logging.ERROR):
-        assert evaluate("--mode", "replay", "--gate", "--write-baseline") == 2
-
-    assert "cannot be combined" in caplog.text
-
-
-def test_the_full_report_can_be_written_as_json(
-    tmp_path: Path, mistakes: set[str], evaluate
-) -> None:
-    report_path = tmp_path / "report.json"
-    evaluate("--mode", "record", "--write-baseline")
+def test_the_full_report_can_be_written_as_json(evaluate: Evaluate, workspace: Path) -> None:
+    report_path = workspace / "report.json"
 
     assert evaluate("--mode", "replay", "--gate", "--output", str(report_path)) == 0
 
@@ -184,13 +165,65 @@ def test_the_full_report_can_be_written_as_json(
 
 
 def test_evaluation_runs_show_up_in_the_ledger_report(
-    mistakes: set[str], evaluate, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    workspace: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    evaluate("--mode", "record")
-    capsys.readouterr()
-
-    assert main(["report", "--ledger", str(tmp_path / "ledger.duckdb")]) == 0
+    assert main(["report", "--ledger", str(workspace / "ledger.duckdb")]) == 0
 
     output = capsys.readouterr().out
     assert "analyst_system@2.0.0" in output
     assert "count_customers" in output
+
+
+def test_live_mode_does_not_store_recordings(
+    tmp_path: Path, fresh_evaluate: Evaluate, mistakes: set[str]
+) -> None:
+    assert fresh_evaluate("--mode", "live", "--task", "count_customers") == 0
+
+    assert not (tmp_path / "fresh" / "recordings").exists()
+
+
+@pytest.mark.parametrize("mode", ["record", "live"])
+def test_record_and_live_modes_need_an_api_key(
+    mode: str,
+    fresh_evaluate: Evaluate,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    monkeypatch.delenv(API_KEY_VARIABLE, raising=False)
+
+    exit_code = fresh_evaluate("--mode", mode)
+
+    assert exit_code == 1
+    assert API_KEY_VARIABLE in caplog.text
+
+
+def test_a_subset_of_tasks_can_run_but_cannot_be_gated_or_stored(
+    fresh_evaluate: Evaluate,
+    mistakes: set[str],
+    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    subset = ["--task", "count_customers", "--task", "total_orders"]
+    assert fresh_evaluate("--mode", "record", *subset) == 0
+    output = capsys.readouterr().out
+    assert "count_customers" in output
+    assert "total_orders" in output
+    assert "enterprise_customers" not in output
+
+    assert fresh_evaluate("--mode", "replay", *subset, "--gate") == 2
+    assert fresh_evaluate("--mode", "record", *subset, "--write-baseline") == 2
+    assert "subset" in caplog.text
+
+
+def test_an_unknown_task_is_a_usage_error(
+    fresh_evaluate: Evaluate, caplog: pytest.LogCaptureFixture
+) -> None:
+    assert fresh_evaluate("--mode", "replay", "--task", "no_such_task") == 2
+    assert "Unknown task(s): no_such_task" in caplog.text
+
+
+def test_a_new_baseline_cannot_gate_itself(
+    fresh_evaluate: Evaluate, caplog: pytest.LogCaptureFixture
+) -> None:
+    assert fresh_evaluate("--mode", "replay", "--gate", "--write-baseline") == 2
+    assert "cannot be combined" in caplog.text
