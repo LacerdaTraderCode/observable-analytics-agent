@@ -16,7 +16,6 @@ from observable_analytics_agent.models.base import (
 )
 from observable_analytics_agent.tools.definition import ToolDefinition
 
-
 DEFAULT_MODEL = "claude-haiku-5-5"
 API_KEY_VARIABLE = "ANTHROPIC_API_KEY"
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 60.0
