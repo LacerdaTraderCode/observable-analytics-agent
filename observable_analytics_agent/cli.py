@@ -215,6 +215,13 @@ def _evaluate(arguments: argparse.Namespace) -> int:
         ledger_path=arguments.ledger,
         otlp_endpoint=os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"),
     )
+    expected_baseline = None
+    if arguments.gate:
+        try:
+            expected_baseline = load_baseline(arguments.baseline)
+        except BaselineError as error:
+            logger.error("%s Record one with `%s`.", error, RERECORD_COMMAND)
+            return 1
     try:
         prepared = prepare_evaluation(setup, os.environ)
     except (MissingApiKeyError, PromptError) as error:
@@ -229,14 +236,12 @@ def _evaluate(arguments: argparse.Namespace) -> int:
         save_baseline(baseline, arguments.baseline)
         logger.info("Baseline written to %s", arguments.baseline)
     gate = None
-    if arguments.gate:
-        try:
-            baseline = load_baseline(arguments.baseline)
-        except BaselineError as error:
-            logger.error("%s Record one with `%s`.", error, RERECORD_COMMAND)
-            return 1
+    if expected_baseline is not None:
         gate = evaluate_gate(
-            metrics, baseline, prompt_version=prepared.prompt.version, model=prepared.model
+            metrics,
+            expected_baseline,
+            prompt_version=prepared.prompt.version,
+            model=prepared.model,
         )
     sys.stdout.write(render_evaluation(results, metrics, gate))
     if arguments.output:
