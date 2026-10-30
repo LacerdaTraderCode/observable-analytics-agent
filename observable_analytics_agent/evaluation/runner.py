@@ -52,7 +52,9 @@ class PreparedEvaluation:
     mode: ModelMode
 
 
-def prepare_evaluation(setup: EvaluationSetup, environment: Mapping[str, str]) -> PreparedEvaluation:
+def prepare_evaluation(
+    setup: EvaluationSetup, environment: Mapping[str, str]
+) -> PreparedEvaluation:
     """Wire the agent for an evaluation.
 
     The glossary is always the local file, whatever KNOWLEDGE_BASE_URL says: an evaluation has to
