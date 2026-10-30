@@ -11,11 +11,13 @@ PRICE_TOLERANCE = 0.001
 
 IN_2025 = "o.ordered_at >= DATE '2025-01-01' AND o.ordered_at < DATE '2026-01-01'"
 IN_2024 = "o.ordered_at >= DATE '2024-01-01' AND o.ordered_at < DATE '2025-01-01'"
-COMPLETED_LINES = (
-    "FROM order_items i JOIN orders o USING (order_id) WHERE o.status = 'completed'"
+COMPLETED_LINES = "FROM order_items i JOIN orders o USING (order_id) WHERE o.status = 'completed'"
+CURRENT_WINDOW = (
+    "CAST(ordered_at AS DATE) > DATE '2025-10-02' AND CAST(ordered_at AS DATE) <= DATE '2025-12-31'"
 )
-CURRENT_WINDOW = "CAST(ordered_at AS DATE) > DATE '2025-10-02' AND CAST(ordered_at AS DATE) <= DATE '2025-12-31'"
-PREVIOUS_WINDOW = "CAST(ordered_at AS DATE) > DATE '2025-07-04' AND CAST(ordered_at AS DATE) <= DATE '2025-10-02'"
+PREVIOUS_WINDOW = (
+    "CAST(ordered_at AS DATE) > DATE '2025-07-04' AND CAST(ordered_at AS DATE) <= DATE '2025-10-02'"
+)
 
 CATEGORY = TaskCategory
 KIND = AnswerKind
