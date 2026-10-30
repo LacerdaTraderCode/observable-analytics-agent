@@ -53,9 +53,7 @@ def refused() -> FinalAnswer:
     return FinalAnswer(status=AnswerStatus.CANNOT_ANSWER, explanation="The data is not there.")
 
 
-def outcome_with(
-    answer: FinalAnswer | None, status: RunStatus = RunStatus.COMPLETED
-) -> RunOutcome:
+def outcome_with(answer: FinalAnswer | None, status: RunStatus = RunStatus.COMPLETED) -> RunOutcome:
     return RunOutcome(
         run_id="run",
         question="Question?",
