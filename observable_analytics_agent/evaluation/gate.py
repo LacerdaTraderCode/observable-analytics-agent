@@ -95,8 +95,9 @@ def _success_rate_check(
 ) -> GateCheck:
     minimum = baseline.success_rate - limits.max_success_rate_drop
     detail = (
-        f"success rate {metrics.success_rate:.1%} against a baseline of {baseline.success_rate:.1%} "
-        f"(allowed drop {limits.max_success_rate_drop:.1%}, minimum {minimum:.1%})"
+        f"success rate {metrics.success_rate:.1%} against a baseline of "
+        f"{baseline.success_rate:.1%} (allowed drop {limits.max_success_rate_drop:.1%}, "
+        f"minimum {minimum:.1%})"
     )
     return GateCheck("success rate", metrics.success_rate >= minimum - COMPARISON_EPSILON, detail)
 
