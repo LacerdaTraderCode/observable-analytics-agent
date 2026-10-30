@@ -50,7 +50,9 @@ def test_a_model_that_follows_the_reference_plan_passes_every_golden_task(
 
     results = harness.run(GOLDEN_TASKS)
 
-    failures = {result.task.task_id: result.score.failures for result in results if not result.score.passed}
+    failures = {
+        result.task.task_id: result.score.failures for result in results if not result.score.passed
+    }
     assert failures == {}
     metrics = summarize(results)
     assert metrics.success_rate == 1.0
