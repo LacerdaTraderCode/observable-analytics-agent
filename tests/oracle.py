@@ -41,10 +41,10 @@ class OracleModel:
             return [tool_use_reply(self._refusal(task))]
         plan = []
         if task.requires_glossary:
-            plan.append(tool_use_reply(tool_call("search_business_glossary", {"query": task.question})))
-        plan.append(
-            tool_use_reply(tool_call("run_read_only_query", {"sql": task.reference_sql}))
-        )
+            plan.append(
+                tool_use_reply(tool_call("search_business_glossary", {"query": task.question}))
+            )
+        plan.append(tool_use_reply(tool_call("run_read_only_query", {"sql": task.reference_sql})))
         plan.append(tool_use_reply(self._submission(task)))
         return plan
 
