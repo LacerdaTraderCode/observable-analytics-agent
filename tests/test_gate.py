@@ -97,7 +97,9 @@ def test_the_success_rate_boundary_is_inclusive() -> None:
     baseline = a_baseline(success_rate=0.9)
     thresholds = GateThresholds(max_success_rate_drop=0.1)
 
-    assert gate_for(metrics_like_the_baseline(success_rate=0.8), baseline, thresholds=thresholds).passed
+    assert gate_for(
+        metrics_like_the_baseline(success_rate=0.8), baseline, thresholds=thresholds
+    ).passed
     assert not gate_for(
         metrics_like_the_baseline(success_rate=0.79), baseline, thresholds=thresholds
     ).passed
