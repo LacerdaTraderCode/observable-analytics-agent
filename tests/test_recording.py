@@ -124,7 +124,9 @@ def test_a_whole_run_replays_identically_without_the_live_model(
         tool_use_reply(tool_call("run_read_only_query", {"sql": "SELECT count(*) FROM orders"})),
         tool_use_reply(submit_answer_call(3942)),
     ]
-    config = AgentConfig(model="test-model", system_prompt="You are an analyst.", budget=RunBudget())
+    config = AgentConfig(
+        model="test-model", system_prompt="You are an analyst.", budget=RunBudget()
+    )
     live_clock = FakeClock()
     live = AnalystAgent(recording_model(tmp_path, replies, live_clock), tool_registry, config)
 
