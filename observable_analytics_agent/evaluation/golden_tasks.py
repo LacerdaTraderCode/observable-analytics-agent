@@ -158,7 +158,9 @@ GOLDEN_TASKS = (
         question="What was our revenue in 2025?",
         category=CATEGORY.GLOSSARY,
         kind=KIND.NUMBER,
-        reference_sql=f"SELECT round(sum(i.quantity * i.unit_price), 2) {COMPLETED_LINES} AND {IN_2025}",
+        reference_sql=(
+            f"SELECT round(sum(i.quantity * i.unit_price), 2) {COMPLETED_LINES} AND {IN_2025}"
+        ),
         tolerance=MONEY_TOLERANCE,
         requires_glossary=True,
     ),
