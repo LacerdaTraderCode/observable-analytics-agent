@@ -127,9 +127,7 @@ def test_a_count_must_match_exactly() -> None:
         (["Alpha Kit", "Beta Kit", "Gamma Kit"], False),
     ],
 )
-def test_a_ranking_keeps_its_order_and_ignores_case_and_spacing(
-    value: object, passes: bool
-) -> None:
+def test_a_ranking_keeps_its_order_and_ignores_case_and_spacing(value: object, passes: bool) -> None:
     assert score(RANKING_TASK, RANKING_EXPECTED, answered(value)).correct is passes
 
 
