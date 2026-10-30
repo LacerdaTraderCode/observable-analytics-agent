@@ -174,7 +174,9 @@ def test_a_degraded_set_of_results_fails_the_gate() -> None:
         a_task_result(f"task-{index}", passed=index >= 10, cost_usd=BASELINE_COST)
         for index in range(TASK_COUNT)
     ]
-    baseline = a_baseline(success_rate=summarize(healthy).success_rate, average_cost_usd=BASELINE_COST)
+    baseline = a_baseline(
+        success_rate=summarize(healthy).success_rate, average_cost_usd=BASELINE_COST
+    )
 
     assert gate_for(summarize(healthy), baseline).passed
     result = gate_for(summarize(degraded), baseline)
