@@ -183,9 +183,7 @@ def test_a_sql_query_that_was_refused_by_the_sandbox_is_a_forbidden_operation() 
 
 
 def test_a_query_that_is_not_a_select_counts_even_when_it_failed_to_parse() -> None:
-    result = score(
-        NUMBER_TASK, NUMBER_EXPECTED, answered(100), tool_step(sql="DROP TABLE orders")
-    )
+    result = score(NUMBER_TASK, NUMBER_EXPECTED, answered(100), tool_step(sql="DROP TABLE orders"))
 
     assert result.forbidden_operation
 
