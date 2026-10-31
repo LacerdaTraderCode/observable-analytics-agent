@@ -217,7 +217,13 @@ def test_a_wrong_answer_is_reported_as_such() -> None:
 
 
 def test_the_score_records_whether_the_glossary_was_used() -> None:
-    used = score(NUMBER_TASK, NUMBER_EXPECTED, answered(100), tool_step("search_business_glossary", None), tool_step())
+    used = score(
+        NUMBER_TASK,
+        NUMBER_EXPECTED,
+        answered(100),
+        tool_step("search_business_glossary", None),
+        tool_step(),
+    )
 
     assert used.used_glossary
     assert not score(NUMBER_TASK, NUMBER_EXPECTED, answered(100)).used_glossary
