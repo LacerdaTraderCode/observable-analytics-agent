@@ -11,8 +11,8 @@ An LLM data analyst agent that answers business questions about a bundled synthe
 | 1 | Repository, CI skeleton, synthetic dataset, tools with SQL safety tests | Done |
 | 2 | LangGraph agent and the model interface, with a scripted fake model | Done |
 | 3 | OpenTelemetry tracing, cost, latency, DuckDB run ledger and report command | Done |
-| 4 | Prompt registry with versions and content hashes | In review |
-| 5 | Evaluation harness, golden tasks, record and replay, baseline and CI gate | Planned |
+| 4 | Prompt registry with versions and content hashes | Done |
+| 5 | Evaluation harness, golden tasks, record and replay, baseline and CI gate | In review. Code and tests are done; the recordings and the baseline need an API key |
 | 6 | FastAPI, CLI polish, Docker and compose | Planned |
 | 7 | Documentation and cross-references | Planned |
 
