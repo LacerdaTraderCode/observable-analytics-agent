@@ -7,7 +7,12 @@ import httpx2
 import pytest
 from anthropic import types
 
-from observable_analytics_agent.models.anthropic_model import AnthropicChatModel
+from observable_analytics_agent.models.anthropic_model import (
+    API_KEY_VARIABLE,
+    AnthropicChatModel,
+    MissingApiKeyError,
+    build_anthropic_model,
+)
 from observable_analytics_agent.models.base import (
     Message,
     ModelRequest,
