@@ -174,6 +174,17 @@ def test_usage_without_cache_fields_counts_zero_cache_tokens() -> None:
     assert reply.usage.cache_read_input_tokens == 0
 
 
+def test_the_builder_needs_an_api_key() -> None:
+    with pytest.raises(MissingApiKeyError, match=API_KEY_VARIABLE):
+        build_anthropic_model({})
+
+
+def test_the_builder_creates_a_model_without_touching_the_network() -> None:
+    model = build_anthropic_model({API_KEY_VARIABLE: "test-key"}, timeout_seconds=5.0)
+
+    assert isinstance(model, AnthropicChatModel)
+
+
 def test_an_api_failure_becomes_a_model_error() -> None:
     request = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
     failure = anthropic.APIConnectionError(message="connection reset", request=request)
