@@ -214,6 +214,7 @@ observable_analytics_agent/
   agent/      typed state, budgets, the StateGraph and the runner
   observability/  recorder, spans, pricing, run ledger and report
   prompts/    the registry that loads and verifies prompt files
+  evaluation/ golden tasks, scoring, metrics, baseline, gate and the harness
 prompts/      versioned prompt files and their manifest
 config/       versioned price table
 glossary/     business glossary used by search_business_glossary
