@@ -2,7 +2,7 @@
 
 An LLM data analyst agent that answers business questions about a bundled synthetic dataset by calling tools. It is built to be **observable** (traces, cost and latency per call, versioned prompts) and **evaluated** (a replay-based quality gate that fails the pull request when results drop).
 
-> **Status: work in progress.** The repository is delivered in seven milestones, one pull request each. Milestones 1 to 4 (dataset, tools, agent graph, model interface, observability and prompt versioning) are what exists today. Evaluation, API and Docker arrive in the next milestones, and this README grows with them.
+> **Status: work in progress.** The repository is delivered in seven milestones, one pull request each. Milestones 1 to 5 (dataset, tools, agent graph, model interface, observability, prompt versioning and the evaluation harness) are what exists today. The recordings and the baseline that activate the CI gate need a real API key and are not committed yet: see "Evaluation" below. The API and Docker arrive in the next milestones.
 
 ## Milestones
 
