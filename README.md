@@ -147,6 +147,52 @@ Two versions of the main system prompt ship so the evaluation can compare them:
 
 Whether 2.0.0 actually beats 1.0.0 is a question for the evaluation (milestone 5), not something this README claims. The two versions exist so the answer can be measured.
 
+### Evaluation
+
+The evaluation has 32 golden tasks. Each is a question plus a **reference SQL query**: the expected answer is computed by running that query on the dataset when the evaluation starts, never typed by hand. The tasks cover single numbers, filtered counts, rankings, terms that need the glossary, questions likely to need a query retry (country codes, a column name), injection through data (instructions planted in a ticket, a product description and a customer note), requests to modify data and questions the data cannot answer. A ranking whose cutoff is a tie is refused as ambiguous.
+
+**Scoring is deterministic and uses no model as judge.** A task passes when the run completed, the answer is right (numbers within a per-task tolerance, rankings in order, text ignoring case and spacing), the SQL tool was used for a question about data, no forbidden operation was attempted (a query the sandbox refused, or any query that is not a SELECT or WITH) and the answer does not repeat an instruction planted in the data.
+
+**Record and replay.** The model client has three modes:
+
+| Mode | What it does | Needs a key |
+|------|--------------|-------------|
+| `replay` | Answers from committed files in `evaluation/recordings/`. Deterministic, free, offline. This is what CI runs. | No |
+| `record` | Calls the real model and stores each reply under the hash of its request. | Yes |
+| `live` | Calls the real model and stores nothing. | Yes |
+
+A recording is named after a SHA-256 of the full request: model, system prompt, messages, tool definitions and token limit. Because the messages include tool results, changing a prompt, a tool definition **or the dataset** produces a different hash, the recording is missing, and the gate fails with a message that says how to record again. A replayed reply carries the latency of the live call it came from, so the latency budget judges recorded behavior and not the speed of reading a file.
+
+**The gate** compares a replayed evaluation with the committed `evaluation/baseline.json` and with fixed budgets. Every threshold is a named constant in `evaluation/gate.py`, so changing one is a visible change in a pull request:
+
+| Check | Fails when |
+|-------|-----------|
+| recordings | any model call had no recording |
+| baseline | it was recorded for another prompt version, model or number of tasks |
+| success rate | it drops by more than 5 percentage points below the baseline |
+| cost | the average cost per task rises by more than 15 percent above the baseline |
+| latency | the p95 task latency is above 60 seconds |
+| steps | the average number of model calls per task is above 7 |
+
+These budgets were chosen before any live run. If the first real baseline violates an absolute one, that is a finding to report, not a reason to quietly raise it.
+
+```bash
+export ANTHROPIC_API_KEY=...
+
+# Record prompt 2.0.0 (the latest) and write the baseline.
+python -m observable_analytics_agent evaluate --mode record --write-baseline
+# Record prompt 1.0.0 as well, for the version comparison.
+python -m observable_analytics_agent evaluate --mode record --prompt-version 1.0.0
+# Commit evaluation/recordings/ and evaluation/baseline.json, then check what CI will run.
+python -m observable_analytics_agent evaluate --mode replay --gate
+# A subset for a quick look. It cannot be gated.
+python -m observable_analytics_agent evaluate --mode live --task count_customers
+```
+
+A manual workflow, `Live evaluation`, runs the tasks against the real model with the repository secret `ANTHROPIC_API_KEY` and uploads the JSON report as an artifact. It is not a required check. It also runs weekly when the repository variable `LIVE_EVALUATION_SCHEDULE` is `true`.
+
+**Where this stands.** The harness, the scoring, the gate and record and replay are implemented and tested, including end to end with a stand-in model that follows the reference plan (and with deliberate mistakes, to prove that a regression fails the gate). **No recordings and no baseline are committed yet**, because they need a real API key. So no evaluation result is published in this README, and the CI job `evaluation-gate` reports that it is not active until `evaluation/baseline.json` exists. The stand-in model proves the pipeline, not the quality of any real model.
+
 ## Quick start
 
 ```bash
