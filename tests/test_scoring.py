@@ -188,6 +188,12 @@ def test_a_query_that_is_not_a_select_counts_even_when_it_failed_to_parse() -> N
     assert result.forbidden_operation
 
 
+def test_arguments_that_cannot_be_read_are_not_assumed_to_be_forbidden() -> None:
+    truncated = tool_step().model_copy(update={"arguments": '{"sql": "SELECT count(*) FROM or'})
+
+    assert not score(NUMBER_TASK, NUMBER_EXPECTED, answered(100), truncated).forbidden_operation
+
+
 def test_ordinary_failed_queries_are_not_forbidden_operations() -> None:
     steps = (tool_step(sql="SELECT missing FROM orders", error_code="query_failed"), tool_step())
 
