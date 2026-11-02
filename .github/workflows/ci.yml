@@ -25,3 +25,24 @@ jobs:
         run: ruff check . && ruff format --check .
       - name: Run tests with coverage
         run: pytest -v --cov --cov-report=term-missing
+
+  evaluation-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: constraints.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt -c constraints.txt
+      - name: Replay the recorded evaluation against the baseline
+        if: ${{ hashFiles('evaluation/baseline.json') != '' }}
+        run: python -m observable_analytics_agent evaluate --mode replay --gate
+      - name: Report that the gate is not active yet
+        if: ${{ hashFiles('evaluation/baseline.json') == '' }}
+        run: >-
+          echo "::notice title=Evaluation gate not active::evaluation/baseline.json does not
+          exist yet, so there is nothing to compare with. Record it with the command in the
+          README and the gate becomes active in the next run."

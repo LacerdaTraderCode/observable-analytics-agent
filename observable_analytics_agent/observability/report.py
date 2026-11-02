@@ -6,9 +6,9 @@ the reference queries; the ledger only knows how the runs went.
 """
 
 from dataclasses import dataclass
-from typing import Any
 
 from observable_analytics_agent.observability.ledger import RunLedger
+from observable_analytics_agent.text_table import render_table
 
 LATENCY_MEDIAN = 0.5
 LATENCY_TAIL = 0.95
@@ -106,7 +106,7 @@ def build_report(ledger: RunLedger) -> LedgerReport:
 
 def render_report(report: LedgerReport) -> str:
     sections = [
-        _table(
+        render_table(
             "Runs by prompt version",
             ["prompt", "runs", "success", "avg cost USD", "total cost USD", "p50 s", "p95 s"],
             [
@@ -122,7 +122,7 @@ def render_report(report: LedgerReport) -> str:
                 for row in report.by_prompt
             ],
         ),
-        _table(
+        render_table(
             "Cost and latency by task",
             ["task", "prompt", "runs", "avg cost USD", "avg latency s"],
             [
@@ -136,7 +136,7 @@ def render_report(report: LedgerReport) -> str:
                 for row in report.by_task
             ],
         ),
-        _table(
+        render_table(
             "Tool error rate by prompt version",
             ["prompt", "tool", "calls", "errors", "error rate"],
             [
@@ -154,18 +154,3 @@ def _percent(share: float) -> str:
 
 def _money(amount: float | None) -> str:
     return NOT_AVAILABLE if amount is None else f"{amount:.6f}"
-
-
-def _table(title: str, header: list[str], rows: list[list[Any]]) -> str:
-    if not rows:
-        return f"{title}\n  (no data)"
-    cells = [[str(cell) for cell in row] for row in rows]
-    widths = [
-        max(len(name), *(len(row[index]) for row in cells)) for index, name in enumerate(header)
-    ]
-    lines = ["  ".join(name.ljust(width) for name, width in zip(header, widths, strict=True))]
-    lines += [
-        "  ".join(cell.ljust(width) for cell, width in zip(row, widths, strict=True))
-        for row in cells
-    ]
-    return "\n".join([title, *lines])

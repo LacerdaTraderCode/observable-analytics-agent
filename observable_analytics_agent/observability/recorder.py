@@ -166,12 +166,15 @@ class RunRecorder:
         return record
 
     def _model_step(self, request: ModelRequest, reply: ModelReply, started: float) -> StepRecord:
+        measured_seconds = self._clock() - started
         return StepRecord(
             step_index=len(self._steps),
             kind=StepKind.LLM,
             name=request.model,
             started_offset_seconds=started - self._run_started,
-            duration_seconds=self._clock() - started,
+            duration_seconds=(
+                reply.latency_seconds if reply.latency_seconds is not None else measured_seconds
+            ),
             outcome=StepOutcome.OK,
             finish_reason=reply.stop_reason,
             usage=reply.usage,

@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from observable_analytics_agent.observability.records import PromptStamp
 
 DEFAULT_PROMPTS_DIR = Path(__file__).resolve().parents[2] / "prompts"
+MAIN_PROMPT_NAME = "analyst_system"
 MANIFEST_NAME = "manifest.json"
 SEMANTIC_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 SHA256_PATTERN = r"^[0-9a-f]{64}$"

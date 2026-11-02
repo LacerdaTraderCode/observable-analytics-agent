@@ -1,5 +1,6 @@
 """Adapter from the ChatModel interface to the Anthropic Messages API."""
 
+from collections.abc import Mapping
 from typing import Any
 
 import anthropic
@@ -14,6 +15,26 @@ from observable_analytics_agent.models.base import (
     TokenUsage,
 )
 from observable_analytics_agent.tools.definition import ToolDefinition
+
+DEFAULT_MODEL = "claude-haiku-5-5"
+API_KEY_VARIABLE = "ANTHROPIC_API_KEY"
+DEFAULT_REQUEST_TIMEOUT_SECONDS = 60.0
+
+
+class MissingApiKeyError(Exception):
+    """A live or record run was requested without an API key."""
+
+
+def build_anthropic_model(
+    environment: Mapping[str, str], timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT_SECONDS
+) -> "AnthropicChatModel":
+    api_key = environment.get(API_KEY_VARIABLE)
+    if not api_key:
+        raise MissingApiKeyError(
+            f"{API_KEY_VARIABLE} is not set. Live and record runs call the Anthropic API and need "
+            "a key; replay runs read committed recordings and do not."
+        )
+    return AnthropicChatModel(anthropic.Anthropic(api_key=api_key, timeout=timeout_seconds))
 
 
 class AnthropicChatModel:

@@ -7,7 +7,12 @@ import httpx2
 import pytest
 from anthropic import types
 
-from observable_analytics_agent.models.anthropic_model import AnthropicChatModel
+from observable_analytics_agent.models.anthropic_model import (
+    API_KEY_VARIABLE,
+    AnthropicChatModel,
+    MissingApiKeyError,
+    build_anthropic_model,
+)
 from observable_analytics_agent.models.base import (
     Message,
     ModelRequest,
@@ -172,6 +177,17 @@ def test_usage_without_cache_fields_counts_zero_cache_tokens() -> None:
     assert reply.usage.cache_creation_input_tokens == 0
     assert reply.usage.cache_creation_1h_input_tokens == 0
     assert reply.usage.cache_read_input_tokens == 0
+
+
+def test_the_builder_needs_an_api_key() -> None:
+    with pytest.raises(MissingApiKeyError, match=API_KEY_VARIABLE):
+        build_anthropic_model({})
+
+
+def test_the_builder_creates_a_model_without_touching_the_network() -> None:
+    model = build_anthropic_model({API_KEY_VARIABLE: "test-key"}, timeout_seconds=5.0)
+
+    assert isinstance(model, AnthropicChatModel)
 
 
 def test_an_api_failure_becomes_a_model_error() -> None:
