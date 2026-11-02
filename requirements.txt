@@ -2,7 +2,7 @@ anthropic==1.11.0
 duckdb==1.5.6
 fastapi==0.142.2
 httpx2==2.13.1
-langgraph==1.2.13
+langgraph==1.2.14
 opentelemetry-api==1.45.0
 opentelemetry-exporter-otlp-proto-http==1.45.0
 opentelemetry-sdk==1.45.0
