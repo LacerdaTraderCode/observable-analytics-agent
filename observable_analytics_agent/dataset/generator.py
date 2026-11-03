@@ -22,6 +22,7 @@ from observable_analytics_agent.dataset.schema import (
 )
 
 DEFAULT_SEED = 7
+DEFAULT_DATASET_PATH = Path("var/analytics.duckdb")
 DATASET_START = date(2024, 1, 1)
 REFERENCE_DATE = date(2025, 12, 31)
 LAST_MOMENT = datetime.combine(REFERENCE_DATE, time(23, 59, 59))
