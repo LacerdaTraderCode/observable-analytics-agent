@@ -45,7 +45,7 @@ jobs:
             --output evaluation-report.json
       - name: Upload the report
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: live-evaluation-report
           path: evaluation-report.json
