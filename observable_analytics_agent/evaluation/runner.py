@@ -7,7 +7,7 @@ from pathlib import Path
 
 from observable_analytics_agent.agent.budget import RunBudget
 from observable_analytics_agent.agent.graph import AgentConfig
-from observable_analytics_agent.dataset.generator import ensure_dataset
+from observable_analytics_agent.dataset.generator import DEFAULT_DATASET_PATH, ensure_dataset
 from observable_analytics_agent.evaluation.harness import EvaluationHarness
 from observable_analytics_agent.models.anthropic_model import build_anthropic_model
 from observable_analytics_agent.models.base import ChatModel
