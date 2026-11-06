@@ -28,7 +28,6 @@ from observable_analytics_agent.tools.glossary import LocalGlossary, load_glossa
 from observable_analytics_agent.tools.sql_runner import ReadOnlyDatabase
 
 EVALUATION_STEP_BUDGET = 8
-DEFAULT_DATASET_PATH = Path("var/analytics.duckdb")
 
 
 @dataclass(frozen=True)
