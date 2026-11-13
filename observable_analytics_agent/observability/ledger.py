@@ -83,25 +83,31 @@ class LedgerNotFoundError(FileNotFoundError):
 class RunLedger:
     def __init__(self, path: Path = DEFAULT_LEDGER_PATH) -> None:
         self._path = path
+        self._write_lock = threading.Lock()
 
     @property
     def path(self) -> Path:
         return self._path
 
     def write(self, record: RunRecord) -> None:
-        """Store a run and its steps in one transaction, creating the tables when needed."""
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        connection = duckdb.connect(str(self._path))
-        try:
-            for statement in SCHEMA_STATEMENTS:
-                connection.execute(statement)
-            connection.begin()
-            _insert(connection, "runs", _run_row(record))
-            for step in record.steps:
-                _insert(connection, "steps", _step_row(record.run_id, step))
-            connection.commit()
-        finally:
-            connection.close()
+        """Store a run and its steps in one transaction, creating the tables when needed.
+
+        The API serves requests on several threads, so writes take a lock: two threads creating
+        the tables or inserting at once would otherwise collide.
+        """
+        with self._write_lock:
+            self._path.parent.mkdir(parents=True, exist_ok=True)
+            connection = duckdb.connect(str(self._path))
+            try:
+                for statement in SCHEMA_STATEMENTS:
+                    connection.execute(statement)
+                connection.begin()
+                _insert(connection, "runs", _run_row(record))
+                for step in record.steps:
+                    _insert(connection, "steps", _step_row(record.run_id, step))
+                connection.commit()
+            finally:
+                connection.close()
 
     def fetch_run(self, run_id: str) -> RunRecord | None:
         with self.read_connection() as connection:
