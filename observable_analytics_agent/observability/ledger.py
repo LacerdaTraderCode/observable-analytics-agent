@@ -4,6 +4,7 @@ Connections are opened per operation and closed right after. DuckDB allows one w
 per file, so holding the file open would block a report run from another process.
 """
 
+import threading
 from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from pathlib import Path
